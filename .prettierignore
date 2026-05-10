@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+public/sw.js
+public/workbox-*.js
+public/swe-worker-*.js
+public/worker-*.js
+public/splash
+*.min.js
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+coverage
+backups

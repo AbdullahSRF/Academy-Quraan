@@ -1,0 +1,37 @@
+{
+  "name": "أكاديمية التحفيظ",
+  "short_name": "التحفيظ",
+  "description": "نظام إدارة أكاديمية تحفيظ القرآن الكريم",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#047857",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "لوحة المشرف",
+      "short_name": "مشرف",
+      "description": "فتح لوحة التحكم",
+      "url": "/admin",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "حصة تسميع",
+      "short_name": "حصة",
+      "description": "بدء تسجيل حصة",
+      "url": "/admin/memorization/session",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

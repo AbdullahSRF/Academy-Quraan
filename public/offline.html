@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#047857" />
+    <title>غير متصل — أكاديمية التحفيظ</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fafaf9;
+        --fg: #1c1917;
+        --muted: #78716c;
+        --card: #ffffff;
+        --border: #e7e5e4;
+        --primary: #047857;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0c0a09;
+          --fg: #fafaf9;
+          --muted: #a8a29e;
+          --card: #1c1917;
+          --border: #3f3f46;
+          --primary: #10b981;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        font-family: Arial, "Segoe UI", sans-serif;
+        font-weight: 700;
+        background: var(--bg);
+        color: var(--fg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .card {
+        max-width: 22rem;
+        width: 100%;
+        border: 2px solid var(--border);
+        border-radius: 1rem;
+        background: var(--card);
+        padding: 1.5rem;
+        text-align: center;
+      }
+      h1 {
+        margin: 0 0 0.75rem;
+        font-size: 1.25rem;
+      }
+      p {
+        margin: 0 0 1.25rem;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+      a {
+        display: inline-block;
+        padding: 0.65rem 1.25rem;
+        border-radius: 0.75rem;
+        background: var(--primary);
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>لا يوجد اتصال بالإنترنت</h1>
+      <p>تحقق من الشبكة ثم أعد المحاولة. يمكنك إغلاق التطبيق وفتحه مجددًا بعد عودة الاتصال.</p>
+      <a href="/">العودة للرئيسية</a>
+    </div>
+  </body>
+</html>
