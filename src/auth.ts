@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import authConfig from "@/auth.config";
 import prisma from "@/infrastructure/db/prisma";
 import type { AppRole } from "@/auth.config";
-import { normalizeLoginEmail, normalizeLoginPassword } from "@/lib/auth/login-normalize";
+import { normalizeLoginEmail, normalizeLoginPassword, coerceCredentialField } from "@/lib/auth/login-normalize";
 import { logger } from "@/lib/logger";
 
 declare module "next-auth" {
@@ -40,17 +40,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const email = normalizeLoginEmail(credentials?.email);
-          const password = normalizeLoginPassword(credentials?.password);
+          const raw = credentials as Record<string, unknown> | undefined;
+          const emailRaw = coerceCredentialField(
+            raw?.email ?? raw?.Email ?? raw?.username ?? raw?.user ?? raw?.identifier,
+          );
+          const passwordRaw = coerceCredentialField(raw?.password ?? raw?.Password ?? raw?.pass);
+
+          const email = normalizeLoginEmail(emailRaw);
+          const password = normalizeLoginPassword(passwordRaw);
           const parsed = credentialsSchema.safeParse({ email, password });
           if (!parsed.success) return null;
 
-          const user = await prisma.user.findFirst({
-            where: { email: { equals: parsed.data.email, mode: "insensitive" } },
+          let user = await prisma.user.findUnique({
+            where: { email: parsed.data.email },
           });
+          if (!user) {
+            try {
+              user = await prisma.user.findFirst({
+                where: { email: { equals: parsed.data.email, mode: "insensitive" } },
+              });
+            } catch (e) {
+              logger.warn("credentials: case-insensitive email lookup skipped", { err: String(e) });
+            }
+          }
+
           if (!user?.passwordHash) return null;
 
-          const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
+          let valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
+          if (!valid && parsed.data.password !== parsed.data.password.trim()) {
+            valid = await bcrypt.compare(parsed.data.password.trim(), user.passwordHash);
+          }
           if (!valid) return null;
 
           return {

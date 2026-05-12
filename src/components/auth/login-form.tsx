@@ -75,6 +75,10 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
         setError("إعداد المصادقة غير مكتمل على الخادم (تحقق من AUTH_SECRET وNEXTAUTH_URL).");
         return;
       }
+      if (res.error === "AccessDenied") {
+        setError("تم رفض الدخول. جرّب بوابة تسجيل الدخول المناسبة (مشرف / طالب / ولي أمر).");
+        return;
+      }
       setError("البريد أو كلمة المرور غير صحيحة.");
       return;
     }

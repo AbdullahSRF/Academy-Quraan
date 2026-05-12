@@ -28,6 +28,9 @@ export default {
     signIn: "/login",
   },
   callbacks: {
+    async signIn() {
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id!;

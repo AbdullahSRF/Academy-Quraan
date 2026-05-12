@@ -7,7 +7,7 @@ import { SonnerToaster } from "@/components/ui/sonner-toaster";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <SessionProvider>
+      <SessionProvider basePath="/api/auth">
         {children}
         <SonnerToaster />
       </SessionProvider>
