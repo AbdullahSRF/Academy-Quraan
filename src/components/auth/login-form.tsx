@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/auth.config";
+import { normalizeLoginEmail, normalizeLoginPassword } from "@/lib/auth/login-normalize";
 
 export type LoginVisualVariant = "default" | "admin" | "student" | "parent";
 
@@ -62,14 +63,18 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
     const callbackUrl = safeCallback ?? fallbackUrl;
 
     const res = await signIn("credentials", {
-      email,
-      password,
+      email: normalizeLoginEmail(email),
+      password: normalizeLoginPassword(password),
       redirect: false,
       callbackUrl,
     });
 
     if (res?.error) {
       setLoading(false);
+      if (res.error === "Configuration") {
+        setError("إعداد المصادقة غير مكتمل على الخادم (تحقق من AUTH_SECRET وNEXTAUTH_URL).");
+        return;
+      }
       setError("البريد أو كلمة المرور غير صحيحة.");
       return;
     }
