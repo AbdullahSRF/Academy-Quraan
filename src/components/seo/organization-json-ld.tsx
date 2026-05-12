@@ -1,9 +1,9 @@
 import { siteConfig } from "@/config/site";
+import { getPublicSiteUrl } from "@/lib/app-url";
 
 /** بيانات منظمة أساسية لصفحة الهبوط — آمنة للواجهة العامة */
 export function OrganizationJsonLd() {
-  const origin = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
-  if (!origin) return null;
+  const origin = getPublicSiteUrl();
 
   const data = {
     "@context": "https://schema.org",

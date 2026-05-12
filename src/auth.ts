@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import authConfig from "@/auth.config";
 import prisma from "@/infrastructure/db/prisma";
 import type { AppRole } from "@/auth.config";
+import { logger } from "@/lib/logger";
 
 declare module "next-auth" {
   interface User {
@@ -27,26 +28,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "كلمة المرور", type: "password" },
       },
       authorize: async (credentials) => {
-        const parsed = credentialsSchema.safeParse(credentials);
-        if (!parsed.success) return null;
+        try {
+          const parsed = credentialsSchema.safeParse(credentials);
+          if (!parsed.success) return null;
 
-        const email = parsed.data.email.trim().toLowerCase();
+          const email = parsed.data.email.trim().toLowerCase();
 
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-        if (!user?.passwordHash) return null;
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+          if (!user?.passwordHash) return null;
 
-        const valid = await bcrypt.compare(parsed.data.password.trim(), user.passwordHash);
-        if (!valid) return null;
+          const valid = await bcrypt.compare(parsed.data.password.trim(), user.passwordHash);
+          if (!valid) return null;
 
-        return {
-          id: user.id,
-          email: user.email ?? undefined,
-          name: user.name ?? undefined,
-          image: user.image ?? undefined,
-          role: user.role as AppRole,
-        };
+          return {
+            id: user.id,
+            email: user.email ?? undefined,
+            name: user.name ?? undefined,
+            image: user.image ?? undefined,
+            role: user.role as AppRole,
+          };
+        } catch (e) {
+          logger.error("credentials authorize failed", { err: String(e) });
+          return null;
+        }
       },
     }),
   ],

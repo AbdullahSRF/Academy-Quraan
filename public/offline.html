@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#047857" />
-    <title>غير متصل — أكاديمية التحفيظ</title>
+    <title>تعذر التحميل — أكاديمية التحفيظ</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -41,7 +41,7 @@
         padding: 1.5rem;
       }
       .card {
-        max-width: 22rem;
+        max-width: 24rem;
         width: 100%;
         border: 2px solid var(--border);
         border-radius: 1rem;
@@ -51,13 +51,18 @@
       }
       h1 {
         margin: 0 0 0.75rem;
-        font-size: 1.25rem;
+        font-size: 1.2rem;
       }
       p {
-        margin: 0 0 1.25rem;
+        margin: 0 0 1rem;
         color: var(--muted);
-        line-height: 1.6;
-        font-size: 0.95rem;
+        line-height: 1.65;
+        font-size: 0.9rem;
+      }
+      .hint {
+        font-size: 0.8rem;
+        margin-bottom: 1.25rem;
+        text-align: start;
       }
       a {
         display: inline-block;
@@ -72,9 +77,16 @@
   </head>
   <body>
     <div class="card">
-      <h1>لا يوجد اتصال بالإنترنت</h1>
-      <p>تحقق من الشبكة ثم أعد المحاولة. يمكنك إغلاق التطبيق وفتحه مجددًا بعد عودة الاتصال.</p>
-      <a href="/">العودة للرئيسية</a>
+      <h1>تعذر تحميل الصفحة</h1>
+      <p>
+        إما أن الجهاز غير متصل بالإنترنت، أو أن المتصفح يستخدم نسخة مخزّنة قديمة (Service Worker). هذه الصفحة ثابتة
+        وليست تشخيصًا لخطأ الخادم.
+      </p>
+      <p class="hint">
+        جرّب: تحديثًا قويًا (Ctrl+F5)، أو مسح بيانات الموقع للنطاق، أو فتح الرابط في نافذة خاصة. إن استمرت المشكلة
+        رغم وجود إنترنت، راجع لوحة الاستضافة (مثل Vercel) وسجلات الأخطاء — وليس بالضرورة «انقطاع الشبكة».
+      </p>
+      <a href="/">إعادة المحاولة — الرئيسية</a>
     </div>
   </body>
 </html>

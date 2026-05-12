@@ -31,7 +31,7 @@ npm run db:seed
 npm run dev
 ```
 
-افتح [http://localhost:3000](http://localhost:3000) ثم سجّل الدخول بحساب الأدمن من الـ seed.
+افتح العنوان الذي يعرضه `npm run dev` في الطرفية (المنفذ الافتراضي غالبًا 3000) ثم سجّل الدخول بحساب الأدمن من الـ seed.
 
 **بعد سحب تحديثات تغيّر `schema.prisma`:** نفّذ `npm run db:push` (أو `npm run db:prepare`) حتى تُحدَّث PostgreSQL. إن رأيت أثناء `next build` رسالة مثل `invalid input value for enum "StudentStatus": "ARCHIVED"` فالمخطط في الكود أحدث من قاعدة البيانات — شغّل `db:push` ثم أعد البناء.
 

@@ -2,6 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// الإنتاج: عيّن DATABASE_URL من Neon (اتصال مجمّع + sslmode=require). لا تضع معلومات اتصال ثابتة في الكود.
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

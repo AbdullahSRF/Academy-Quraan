@@ -1,9 +1,16 @@
 import type { NextConfig } from "next";
 import withPWAInit from "@ducanh2912/next-pwa";
 
-/** عطّل الـ PWA إذا ظهرت صفحة بيضاء بعد نشر تحديث: ضع NEXT_DISABLE_PWA=1 في `.env` ثم أعد `npm run build`. */
+/**
+ * على Vercel: PWA معطّل افتراضيًا (Service Worker يسبب أحيانًا «لا يوجد اتصال» رغم عمل الموقع).
+ * لتفعيله: عيّن NEXT_ENABLE_PWA=1 وNEXT_PUBLIC_ENABLE_PWA=1 ثم أعد النشر.
+ * محليًا: عطّل بـ NEXT_DISABLE_PWA=1 أو يبقى مفعّلًا في production غير Vercel.
+ */
+const pwaEnabledOnVercel = process.env.NEXT_ENABLE_PWA === "1";
 const pwaDisabled =
-  process.env.NODE_ENV === "development" || process.env.NEXT_DISABLE_PWA === "1";
+  process.env.NODE_ENV === "development" ||
+  process.env.NEXT_DISABLE_PWA === "1" ||
+  (!!process.env.VERCEL && !pwaEnabledOnVercel);
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -17,9 +24,11 @@ const withPWA = withPWAInit({
     skipWaiting: false,
     clientsClaim: false,
     cleanupOutdatedCaches: true,
-    /** دعم جزئي للتصفح بدون شبكة — صفحة ثابتة خارج تطبيق Next */
-    navigateFallback: "/offline.html",
-    navigateFallbackDenylist: [/^\/api\//, /^\/_next\//],
+    /**
+     * لا نستخدم navigateFallback إلى offline.html: على Vercel/Next يعامل Workbox «فشل التنقل»
+     * (500، مهلة، فشل RSC، تعارض SW) كسقوط شبكة فيعرض صفحة «لا يوجد اتصال» بشكل مضلّل.
+     * للوضع بدون شبكة يبقى الأصل يفشل بصدق؛ يمكن فتح /offline.html يدويًا أو تعطيل PWA بـ NEXT_DISABLE_PWA=1.
+     */
   },
 });
 
@@ -41,7 +50,11 @@ const nextConfig: NextConfig = {
         value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
       },
     ];
-    return [{ source: "/:path*", headers: security }];
+    const noStoreSw = [{ key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" }];
+    return [
+      { source: "/sw.js", headers: noStoreSw },
+      { source: "/:path*", headers: security },
+    ];
   },
 };
 

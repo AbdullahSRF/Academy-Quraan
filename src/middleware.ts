@@ -29,6 +29,15 @@ function loginUrlForProtectedPrefix(prefix: string, req: { url: string }): URL {
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+
+  /** عند تعطيل PWA: `/sw.js` يعيد سكربتًا يُلغي أي Service Worker قديم (بدون الاعتماد على ملفات `public` المتبقية). */
+  if (pathname === "/sw.js") {
+    if (process.env.NEXT_PUBLIC_ENABLE_PWA === "1") {
+      return NextResponse.next();
+    }
+    return NextResponse.rewrite(new URL("/api/pwa/noop-sw", req.url));
+  }
+
   const isLoggedIn = !!req.auth;
   const role = req.auth?.user?.role;
 
@@ -66,6 +75,7 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
+    "/sw.js",
     "/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|workbox-|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

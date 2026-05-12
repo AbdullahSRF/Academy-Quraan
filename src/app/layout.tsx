@@ -2,10 +2,12 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { AppleSplashLinks } from "@/components/pwa/apple-splash-links";
+import { StripServiceWorkerScript } from "@/components/pwa/strip-service-worker-script";
 import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
 import { siteConfig } from "@/config/site";
+import { getPublicSiteUrl } from "@/lib/app-url";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const appUrl = getPublicSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
@@ -52,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
+        <StripServiceWorkerScript />
         <AppleSplashLinks />
       </head>
       <body className="min-h-dvh">

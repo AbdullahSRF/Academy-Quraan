@@ -22,6 +22,7 @@ export function AdminGlobalSearch({ className }: { className?: string }) {
   const [loading, setLoading] = React.useState(false);
   const [students, setStudents] = React.useState<AdminSearchStudentHit[]>([]);
   const [invoices, setInvoices] = React.useState<AdminSearchInvoiceHit[]>([]);
+  const [apiError, setApiError] = React.useState<string | null>(null);
   const wrapRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -36,17 +37,32 @@ export function AdminGlobalSearch({ className }: { className?: string }) {
     if (q.trim().length < 1) {
       setStudents([]);
       setInvoices([]);
+      setApiError(null);
       setLoading(false);
       return;
     }
     setLoading(true);
+    setApiError(null);
     const t = window.setTimeout(async () => {
       try {
         const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q.trim())}`);
+        if (!res.ok) {
+          setApiError(
+            res.status === 403
+              ? "غير مصرّح — سجّل الدخول كمشرف."
+              : res.status === 429
+                ? "طلبات كثيرة — انتظر قليلًا."
+                : `تعذر البحث (رمز ${res.status}). ليست بالضرورة مشكلة إنترنت.`,
+          );
+          setStudents([]);
+          setInvoices([]);
+          return;
+        }
         const data = (await res.json()) as { students?: AdminSearchStudentHit[]; invoices?: AdminSearchInvoiceHit[] };
         setStudents(data.students ?? []);
         setInvoices(data.invoices ?? []);
       } catch {
+        setApiError("تعذر الاتصال بالخادم — تحقق من الشبكة أو أعد تحميل الصفحة.");
         setStudents([]);
         setInvoices([]);
       } finally {
@@ -80,7 +96,11 @@ export function AdminGlobalSearch({ className }: { className?: string }) {
           className="absolute start-0 top-[calc(100%+6px)] z-50 max-h-80 w-full overflow-auto rounded-xl border border-border bg-card py-2 shadow-lg"
           role="listbox"
         >
-          {loading ? (
+          {apiError ? (
+            <p className="px-3 py-2 text-sm font-bold text-destructive" role="alert">
+              {apiError}
+            </p>
+          ) : loading ? (
             <p className="px-3 py-2 text-sm font-bold text-muted">جاري البحث…</p>
           ) : empty ? (
             <p className="px-3 py-2 text-sm font-bold text-muted">لا نتائج</p>

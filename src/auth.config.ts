@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import type { DefaultSession } from "next-auth";
+import { getAuthSecret } from "@/lib/auth-env";
 
 export type AppRole = "ADMIN" | "STUDENT" | "PARENT";
 
@@ -18,7 +19,7 @@ declare module "@auth/core/jwt" {
 
 export default {
   trustHost: true,
-  secret: process.env.AUTH_SECRET,
+  secret: getAuthSecret(),
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,

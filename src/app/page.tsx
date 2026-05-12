@@ -1,10 +1,12 @@
 import Link from "next/link";
+import type { Session } from "next-auth";
 import { BookOpen, CheckCircle2, LineChart, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { logger } from "@/lib/logger";
 
 function dashboardForRole(role: string) {
   if (role === "ADMIN") return "/admin";
@@ -42,8 +44,18 @@ const steps = [
   { n: "3", title: "ابدأ الاستخدام", desc: "من الجوال أو المتصفح — مع دعم التثبيت كتطبيق (PWA)." },
 ] as const;
 
+/** `auth()` يعتمد على headers — منع prerender الثابت يتجنب أخطاء مضللة أثناء `next build`. */
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
-  const session = await auth();
+  let session: Session | null = null;
+  let authFailure: string | null = null;
+  try {
+    session = await auth();
+  } catch (e) {
+    authFailure = e instanceof Error ? e.message : "فشل التحقق من الجلسة";
+    logger.error("home auth() failed", { message: authFailure });
+  }
   if (session?.user?.role) {
     redirect(dashboardForRole(session.user.role));
   }
@@ -54,6 +66,15 @@ export default async function HomePage() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_50%_at_50%_-10%,color-mix(in_oklab,var(--primary)_18%,transparent),transparent)]"
       />
+      {authFailure ? (
+        <div
+          role="alert"
+          className="relative z-20 border-b-2 border-amber-500/60 bg-amber-500/15 px-5 py-3 text-center text-sm font-bold text-foreground sm:px-8"
+        >
+          تعذر التحقق من حالة الدخول تلقائيًا ({authFailure}). يمكنك متابعة التصفح والدخول يدويًا — إن استمر الأمر، راجع
+          AUTH_SECRET وNEXTAUTH_URL على الخادم وليس بالضرورة انقطاع الإنترنت.
+        </div>
+      ) : null}
       <header className="relative z-10 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
           <span className="text-lg font-bold tracking-tight text-foreground sm:text-xl">أكاديمية التحفيظ</span>
