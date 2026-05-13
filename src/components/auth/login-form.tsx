@@ -12,26 +12,21 @@ import { cn } from "@/lib/utils";
 import type { AppRole } from "@/auth.config";
 import { normalizeLoginEmail, normalizeLoginPassword } from "@/lib/auth/login-normalize";
 
-export type LoginVisualVariant = "default" | "admin" | "student" | "parent";
+export type LoginVisualVariant = "default" | "admin";
 
 function dashboardForRole(role: AppRole): string {
   if (role === "ADMIN") return "/admin";
-  if (role === "STUDENT") return "/student";
-  return "/parent";
+  return "/login/admin";
 }
 
 const variantBar: Record<LoginVisualVariant, string> = {
   default: "from-primary via-emerald-600 to-primary",
   admin: "from-primary via-teal-600 to-primary",
-  student: "from-sky-600 via-blue-600 to-indigo-600",
-  parent: "from-violet-600 via-purple-600 to-fuchsia-600",
 };
 
 const variantCard: Record<LoginVisualVariant, string> = {
   default: "border-border ring-border/80",
   admin: "border-primary/25 ring-primary/15",
-  student: "border-sky-500/30 ring-sky-500/10",
-  parent: "border-violet-500/30 ring-violet-500/10",
 };
 
 type LoginFormProps = {
@@ -78,7 +73,7 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
         return;
       }
       if (res.error === "AccessDenied") {
-        setError("تم رفض الدخول. جرّب بوابة تسجيل الدخول المناسبة (مشرف / طالب / ولي أمر).");
+        setError("تم رفض الدخول. هذه المنصة للمشرفين فقط.");
         return;
       }
       setError("البريد أو كلمة المرور غير صحيحة.");
@@ -97,7 +92,7 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
     if (enforceRole && role !== enforceRole) {
       await signOut({ redirect: false });
       setLoading(false);
-      setError("هذا الحساب لا يملك صلاحية الدخول من هذه البوابة. اختر نوع الدخول الصحيح من صفحة تسجيل الدخول.");
+      setError("هذا الحساب لا يملك صلاحية الدخول من هذه البوابة — المشرفون فقط.");
       return;
     }
 

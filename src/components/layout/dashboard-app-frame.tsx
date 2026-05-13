@@ -17,19 +17,16 @@ import { DashboardMobileNav } from "@/components/layout/dashboard-mobile-nav";
 import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import { useDashboardUiStore } from "@/store/dashboard-ui-store";
 import type { AppRole } from "@/auth.config";
-import { ImpersonationStrip } from "@/components/auth/impersonation-strip";
 
 export function DashboardAppFrame({
   role,
   userName,
   userEmail,
-  impersonation,
   children,
 }: {
   role: AppRole;
   userName: string | null | undefined;
   userEmail: string | null | undefined;
-  impersonation?: { adminLabel: string } | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -46,7 +43,7 @@ export function DashboardAppFrame({
           </Link>
           <p className="text-xs font-bold text-muted">منصة إدارية</p>
         </div>
-        <DashboardNav role={role} />
+        <DashboardNav />
         <div className="mt-auto border-t border-border p-4">
           <p className="mb-3 truncate text-sm font-bold text-muted" title={display}>
             {display}
@@ -69,15 +66,13 @@ export function DashboardAppFrame({
               <div className="hidden flex-1 md:block" />
             )}
             {role === "ADMIN" ? <AdminQuickActions className="shrink-0" /> : null}
-            <DashboardCommandMenu role={role} />
+            <DashboardCommandMenu />
             <span className="min-w-0 flex-1 truncate text-center text-sm font-bold text-foreground md:hidden">التحفيظ</span>
             <ThemeToggle />
             <span className="hidden max-w-[11rem] truncate text-end text-xs font-bold text-muted md:block" dir="ltr" title={userEmail ?? ""}>
               {display}
             </span>
           </header>
-
-          {impersonation ? <ImpersonationStrip adminLabel={impersonation.adminLabel} /> : null}
 
           <main className="site-main flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <motion.div
@@ -102,7 +97,7 @@ export function DashboardAppFrame({
             </div>
           ) : null}
           <div className="min-h-0 flex-1 overflow-y-auto p-2">
-            <DashboardNav role={role} onNavigate={() => setMenuOpen(false)} />
+            <DashboardNav onNavigate={() => setMenuOpen(false)} />
           </div>
           <div className="mt-auto border-t border-border p-4">
             <p className="mb-2 truncate text-sm font-bold text-muted">{display}</p>
@@ -111,7 +106,7 @@ export function DashboardAppFrame({
         </SheetContent>
       </Sheet>
 
-      <DashboardMobileNav role={role} onOpenMenu={() => setMenuOpen(true)} />
+      <DashboardMobileNav onOpenMenu={() => setMenuOpen(true)} />
       <PwaInstallBanner />
     </div>
   );

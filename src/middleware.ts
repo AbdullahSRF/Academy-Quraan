@@ -8,24 +8,7 @@ const { auth } = NextAuth({
   providers: [],
 });
 
-const LOGIN_PATHS = ["/login", "/login/admin", "/login/student", "/login/parent"] as const;
-
-function dashboardPath(role: string): string {
-  if (role === "ADMIN") return "/admin";
-  if (role === "STUDENT") return "/student";
-  if (role === "PARENT") return "/parent";
-  return "/login";
-}
-
-function isLoginPath(pathname: string): boolean {
-  return (LOGIN_PATHS as readonly string[]).includes(pathname);
-}
-
-function loginUrlForProtectedPrefix(prefix: string, req: { url: string }): URL {
-  const base =
-    prefix === "/admin" ? "/login/admin" : prefix === "/student" ? "/login/student" : prefix === "/parent" ? "/login/parent" : "/login";
-  return new URL(base, req.url);
-}
+const LOGIN_PATHS = ["/login", "/login/admin"] as const;
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -38,41 +21,37 @@ export default auth((req) => {
     return NextResponse.rewrite(new URL("/api/pwa/noop-sw", req.url));
   }
 
+  /** واجهات الطالب/ولي الأمر أُزيلت — أي رابط قديم يُوجَّه لبوابة المشرف. */
+  if (pathname === "/login/student" || pathname === "/login/parent") {
+    return NextResponse.redirect(new URL("/login/admin", req.url));
+  }
+  if (pathname.startsWith("/student") || pathname.startsWith("/parent")) {
+    return NextResponse.redirect(new URL("/login/admin", req.url));
+  }
+
   const isLoggedIn = !!req.auth;
   const role = req.auth?.user?.role;
 
-  if (isLoginPath(pathname)) {
-    if (isLoggedIn && role) {
-      return NextResponse.redirect(new URL(dashboardPath(role), req.url));
+  const isLoginPath = (LOGIN_PATHS as readonly string[]).includes(pathname);
+  if (isLoginPath) {
+    if (isLoggedIn && role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", req.url));
     }
     return NextResponse.next();
   }
 
-  const protectedPrefixes = ["/admin", "/student", "/parent"] as const;
-  const matched = protectedPrefixes.find((p) => pathname.startsWith(p));
-  if (!matched) {
+  if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
   if (!isLoggedIn) {
-    const url = loginUrlForProtectedPrefix(matched, req);
+    const url = new URL("/login/admin", req.url);
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
   }
 
-  /** المشرف يصل لكل لوحات التحكم؛ غير المشرف يقتصر على لوحته فقط. */
-  if (role === "ADMIN") {
-    return NextResponse.next();
-  }
-
-  if (matched === "/admin") {
-    return NextResponse.redirect(new URL(dashboardPath(role ?? "STUDENT"), req.url));
-  }
-  if (matched === "/student" && role !== "STUDENT") {
-    return NextResponse.redirect(new URL(dashboardPath(role ?? "PARENT"), req.url));
-  }
-  if (matched === "/parent" && role !== "PARENT") {
-    return NextResponse.redirect(new URL(dashboardPath(role ?? "STUDENT"), req.url));
+  if (role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();

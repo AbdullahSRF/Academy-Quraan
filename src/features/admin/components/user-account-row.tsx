@@ -3,8 +3,7 @@
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { Eye, KeyRound, Mail, MessageSquare, Trash2 } from "lucide-react";
+import { KeyRound, Mail, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,8 +25,6 @@ import {
   type UserAccountActionState,
 } from "@/features/admin/user-accounts-actions";
 import { adminSendInboxMessageAction, type AdminMessageActionState } from "@/features/admin-messages/actions";
-import { beginImpersonationAction } from "@/features/auth/impersonation-actions";
-import { IMPERSONATION_SIGNIN_EMAIL } from "@/lib/auth/impersonation-constants";
 
 const accInitial: UserAccountActionState = { ok: false, error: null };
 const msgInitial: AdminMessageActionState = { ok: false, error: null };
@@ -52,38 +49,12 @@ export function UserAccountRow({ row }: { row: UserAccountRowSerialized }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [msgOpen, setMsgOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
-  const [impBusy, setImpBusy] = useState(false);
 
   const [pwdState, pwdAction] = useActionState(adminResetUserPasswordAction, accInitial);
   const [emailState, emailAction] = useActionState(adminSetUserEmailAction, accInitial);
   const [delState, delAction] = useActionState(adminDeleteUserAccountAction, accInitial);
   const [msgState, msgAction] = useActionState(adminSendInboxMessageAction, msgInitial);
   const [, toggleDisabledAction] = useActionState(adminToggleUserDisabledAction, accInitial);
-
-  async function onImpersonate() {
-    setImpBusy(true);
-    try {
-      const res = await beginImpersonationAction(row.userId);
-      if (!res.ok) {
-        alert(res.error);
-        return;
-      }
-      const sign = await signIn("credentials", {
-        email: IMPERSONATION_SIGNIN_EMAIL,
-        password: res.token,
-        redirect: false,
-        callbackUrl: res.targetRole === "STUDENT" ? "/student" : "/parent",
-        remember: "1",
-      });
-      if (sign?.error) {
-        alert("تعذر تبديل الجلسة.");
-        return;
-      }
-      window.location.assign(res.targetRole === "STUDENT" ? "/student" : "/parent");
-    } finally {
-      setImpBusy(false);
-    }
-  }
 
   const profileLink = row.role === "STUDENT" && row.studentId ? `/admin/students/${row.studentId}` : null;
 
@@ -109,18 +80,6 @@ export function UserAccountRow({ row }: { row: UserAccountRowSerialized }) {
       </td>
       <td className="px-2 py-3">
         <div className="flex flex-wrap items-center justify-end gap-1">
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            className="gap-1 font-bold"
-            disabled={impBusy}
-            onClick={() => void onImpersonate()}
-          >
-            <Eye className="size-3.5" aria-hidden />
-            دخول كـ
-          </Button>
-
           <Dialog open={pwdOpen} onOpenChange={setPwdOpen}>
             <DialogTrigger asChild>
               <Button type="button" size="sm" variant="outline" className="gap-1 font-bold">
@@ -191,7 +150,7 @@ export function UserAccountRow({ row }: { row: UserAccountRowSerialized }) {
             <DialogContent dir="rtl">
               <DialogHeader>
                 <DialogTitle>إرسال ملاحظة</DialogTitle>
-                <DialogDescription>تظهر في لوحة المستخدم كتنبيه من الإدارة.</DialogDescription>
+                <DialogDescription>تُسجَّل للمستخدم في النظام (سجلّ داخلي).</DialogDescription>
               </DialogHeader>
               <form action={msgAction} className="space-y-3">
                 <input type="hidden" name="recipientUserId" value={row.userId} />

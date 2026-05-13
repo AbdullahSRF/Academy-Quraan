@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import prisma from "@/infrastructure/db/prisma";
 import { requireAdminSession } from "@/lib/auth-guard";
-import { auth } from "@/auth";
 
 export type AdminMessageActionState = { ok: boolean; error: string | null };
 
@@ -37,34 +36,5 @@ export async function adminSendInboxMessageAction(_prev: AdminMessageActionState
     },
   });
   revalidatePath("/admin/user-accounts");
-  revalidatePath("/student");
-  revalidatePath("/parent");
   return { ok: true, error: null };
-}
-
-export async function markAdminInboxMessageReadAction(messageId: string): Promise<AdminMessageActionState> {
-  const session = await auth();
-  const uid = session?.user?.id;
-  if (!uid) return { ok: false, error: "غير مصرّح." };
-
-  const msg = await prisma.adminInboxMessage.findUnique({
-    where: { id: messageId },
-    select: { id: true, recipientUserId: true, readAt: true },
-  });
-  if (!msg || msg.recipientUserId !== uid) return { ok: false, error: "الرسالة غير موجودة." };
-  if (msg.readAt) return { ok: true, error: null };
-
-  await prisma.adminInboxMessage.update({
-    where: { id: messageId },
-    data: { readAt: new Date() },
-  });
-  revalidatePath("/student");
-  revalidatePath("/parent");
-  return { ok: true, error: null };
-}
-
-export async function markAdminInboxMessageReadFormAction(formData: FormData): Promise<void> {
-  const messageId = String(formData.get("messageId") ?? "").trim();
-  if (!messageId) return;
-  await markAdminInboxMessageReadAction(messageId);
 }

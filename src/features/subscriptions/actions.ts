@@ -57,8 +57,6 @@ export async function assignStudentSubscriptionFormAction(formData: FormData) {
 
   revalidatePath("/admin/subscriptions");
   revalidatePath("/admin/finance");
-  revalidatePath("/student");
-  revalidatePath("/parent");
   revalidatePath("/admin/reports");
   return { ok: true as const, error: null as string | null };
 }
@@ -88,8 +86,6 @@ export async function updateStudentSubscriptionStatusFormAction(formData: FormDa
 
   revalidatePath("/admin/subscriptions");
   revalidatePath("/admin/finance");
-  revalidatePath("/student");
-  revalidatePath("/parent");
   revalidatePath("/admin/reports");
   return { ok: true as const, error: null as string | null };
 }

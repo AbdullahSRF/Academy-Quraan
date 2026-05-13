@@ -7,8 +7,6 @@ import {
   ClipboardList,
   Command,
   FileSpreadsheet,
-  GraduationCap,
-  HeartHandshake,
   LayoutDashboard,
   Search,
   Users,
@@ -28,7 +26,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import type { AppRole } from "@/auth.config";
 
 function useCommandPaletteListener(setOpen: (v: boolean) => void) {
   React.useEffect(() => {
@@ -43,7 +40,7 @@ function useCommandPaletteListener(setOpen: (v: boolean) => void) {
   }, [setOpen]);
 }
 
-export function DashboardCommandMenu({ role }: { role: AppRole }) {
+export function DashboardCommandMenu() {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
   useCommandPaletteListener(setOpen);
@@ -78,78 +75,56 @@ export function DashboardCommandMenu({ role }: { role: AppRole }) {
         <CommandList>
           <CommandEmpty>لا نتائج.</CommandEmpty>
 
-          {role === "ADMIN" ? (
-            <>
-              <CommandGroup heading="المشرف">
-                <CommandItem onSelect={() => go("/admin")}>
-                  <LayoutDashboard className="size-4 text-primary" aria-hidden />
-                  نظرة عامة
-                  <CommandShortcut>/admin</CommandShortcut>
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/students")}>
-                  <Users className="size-4 text-primary" aria-hidden />
-                  الطلاب
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/user-accounts")}>
-                  <KeyRound className="size-4 text-primary" aria-hidden />
-                  حسابات الدخول
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/accounts")}>
-                  <UserCog className="size-4 text-primary" aria-hidden />
-                  الحسابات وأولياء الأمور
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/attendance")}>
-                  <ClipboardList className="size-4 text-primary" aria-hidden />
-                  الحضور والغياب
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/memorization")}>
-                  <BookOpenCheck className="size-4 text-primary" aria-hidden />
-                  الحفظ والتسميع
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/memorization/session")}>
-                  <BookOpenCheck className="size-4 text-primary" aria-hidden />
-                  حصة تسميع
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/finance")}>
-                  <Wallet className="size-4 text-primary" aria-hidden />
-                  المالية
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/subscriptions")}>
-                  <Repeat className="size-4 text-primary" aria-hidden />
-                  الاشتراكات
-                </CommandItem>
-                <CommandItem onSelect={() => go("/admin/reports")}>
-                  <FileSpreadsheet className="size-4 text-primary" aria-hidden />
-                  التقارير
-                </CommandItem>
-              </CommandGroup>
-              <CommandSeparator />
-              <CommandGroup heading="بحث سريع">
-                <CommandItem onSelect={() => go("/admin/students")}>
-                  <Search className="size-4" aria-hidden />
-                  فتح دليل الطلاب للبحث المحلي
-                </CommandItem>
-              </CommandGroup>
-            </>
-          ) : null}
-
-          {role === "STUDENT" ? (
-            <CommandGroup heading="الطالب">
-              <CommandItem onSelect={() => go("/student")}>
-                <GraduationCap className="size-4 text-primary" aria-hidden />
-                لوحة الطالب
-              </CommandItem>
-            </CommandGroup>
-          ) : null}
-
-          {role === "PARENT" ? (
-            <CommandGroup heading="ولي الأمر">
-              <CommandItem onSelect={() => go("/parent")}>
-                <HeartHandshake className="size-4 text-primary" aria-hidden />
-                لوحة ولي الأمر
-              </CommandItem>
-            </CommandGroup>
-          ) : null}
+          <CommandGroup heading="المشرف">
+            <CommandItem onSelect={() => go("/admin")}>
+              <LayoutDashboard className="size-4 text-primary" aria-hidden />
+              نظرة عامة
+              <CommandShortcut>/admin</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/students")}>
+              <Users className="size-4 text-primary" aria-hidden />
+              الطلاب
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/user-accounts")}>
+              <KeyRound className="size-4 text-primary" aria-hidden />
+              حسابات الدخول
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/accounts")}>
+              <UserCog className="size-4 text-primary" aria-hidden />
+              الحسابات وأولياء الأمور
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/attendance")}>
+              <ClipboardList className="size-4 text-primary" aria-hidden />
+              الحضور والغياب
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/memorization")}>
+              <BookOpenCheck className="size-4 text-primary" aria-hidden />
+              الحفظ والتسميع
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/memorization/session")}>
+              <BookOpenCheck className="size-4 text-primary" aria-hidden />
+              حصة تسميع
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/finance")}>
+              <Wallet className="size-4 text-primary" aria-hidden />
+              المالية
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/subscriptions")}>
+              <Repeat className="size-4 text-primary" aria-hidden />
+              الاشتراكات
+            </CommandItem>
+            <CommandItem onSelect={() => go("/admin/reports")}>
+              <FileSpreadsheet className="size-4 text-primary" aria-hidden />
+              التقارير
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="بحث سريع">
+            <CommandItem onSelect={() => go("/admin/students")}>
+              <Search className="size-4" aria-hidden />
+              فتح دليل الطلاب للبحث المحلي
+            </CommandItem>
+          </CommandGroup>
 
           <CommandSeparator />
           <CommandGroup heading="عام">

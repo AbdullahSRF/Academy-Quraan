@@ -8,10 +8,8 @@ export const siteConfig = {
   /** مسار الصفحة الرئيسية للوحة بعد تسجيل الدخول حسب الدور يُحدد في middleware/الروابط */
   urls: {
     marketing: "/",
-    login: "/login",
+    login: "/login/admin",
     adminHome: "/admin",
-    parentHome: "/parent",
-    studentHome: "/student",
   },
 } as const;
 

@@ -6,21 +6,11 @@ import type { AppRole } from "@/auth.config";
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login/admin");
   }
 
-  const impersonation =
-    session.user.impersonatorId != null
-      ? { adminLabel: session.user.impersonatorName?.trim() || "المشرف" }
-      : null;
-
   return (
-    <DashboardShell
-      role={session.user.role as AppRole}
-      userName={session.user.name}
-      userEmail={session.user.email}
-      impersonation={impersonation}
-    >
+    <DashboardShell role={session.user.role as AppRole} userName={session.user.name} userEmail={session.user.email}>
       {children}
     </DashboardShell>
   );

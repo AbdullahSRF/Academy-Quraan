@@ -152,7 +152,6 @@ export async function completeMemorizationSessionAction(
     revalidatePath("/admin/memorization/session");
     revalidatePath("/admin/students");
     revalidatePath(`/admin/students/${studentId}/memorization`);
-    revalidatePath("/student");
     return { ok: true, error: null };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "تعذر حفظ الحصة.";

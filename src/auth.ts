@@ -7,8 +7,6 @@ import authConfig from "@/auth.config";
 import prisma from "@/infrastructure/db/prisma";
 import type { AppRole } from "@/auth.config";
 import { normalizeLoginEmail, normalizeLoginPassword, coerceCredentialField } from "@/lib/auth/login-normalize";
-import { IMPERSONATION_SIGNIN_EMAIL } from "@/lib/auth/impersonation-constants";
-import { verifyImpersonationToken } from "@/lib/auth/impersonation-token";
 import { logger } from "@/lib/logger";
 
 const credentialsSchema = z.object({
@@ -55,32 +53,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const parsed = credentialsSchema.safeParse({ email, password });
           if (!parsed.success) return null;
 
-          if (parsed.data.email === IMPERSONATION_SIGNIN_EMAIL) {
-            const payload = verifyImpersonationToken(parsed.data.password);
-            if (!payload) return null;
-
-            const [admin, target] = await Promise.all([
-              prisma.user.findUnique({ where: { id: payload.adminId } }),
-              prisma.user.findUnique({ where: { id: payload.targetUserId } }),
-            ]);
-
-            if (!admin || admin.role !== "ADMIN" || admin.disabled) return null;
-            if (!target?.passwordHash || target.disabled) return null;
-            if (target.role !== "STUDENT" && target.role !== "PARENT") return null;
-
-            return {
-              id: target.id,
-              email: target.email ? target.email.trim().toLowerCase() : undefined,
-              name: target.name ?? undefined,
-              image: target.image ?? undefined,
-              role: target.role as AppRole,
-              remember: true,
-              impersonatorId: admin.id,
-              impersonatorName: admin.name,
-              impersonatorEmail: admin.email,
-            };
-          }
-
           let user = await prisma.user.findUnique({
             where: { email: parsed.data.email },
           });
@@ -102,6 +74,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             valid = await bcrypt.compare(parsed.data.password.trim(), user.passwordHash);
           }
           if (!valid) return null;
+
+          if (user.role !== "ADMIN") {
+            return null;
+          }
 
           return {
             id: user.id,

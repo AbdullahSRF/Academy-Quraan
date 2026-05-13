@@ -10,14 +10,11 @@ import {
   Wallet,
   Repeat,
   FileSpreadsheet,
-  GraduationCap,
-  HeartHandshake,
   CalendarCheck,
   UserCog,
   KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { AppRole } from "@/auth.config";
 
 const adminLinks = [
   { href: "/admin", label: "نظرة عامة", icon: LayoutDashboard },
@@ -32,15 +29,6 @@ const adminLinks = [
   { href: "/admin/reports", label: "التقارير", icon: FileSpreadsheet },
 ] as const;
 
-const studentLinks = [{ href: "/student", label: "لوحة الطالب", icon: GraduationCap }] as const;
-const parentLinks = [{ href: "/parent", label: "لوحة ولي الأمر", icon: HeartHandshake }] as const;
-
-function linksForRole(role: AppRole) {
-  if (role === "ADMIN") return adminLinks;
-  if (role === "STUDENT") return studentLinks;
-  return parentLinks;
-}
-
 function isNavActive(pathname: string, href: string) {
   if (href === "/admin") return pathname === "/admin";
   if (href === "/admin/memorization") return pathname === "/admin/memorization";
@@ -49,16 +37,15 @@ function isNavActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function DashboardNav({ role, onNavigate }: { role: AppRole; onNavigate?: () => void }) {
+export function DashboardNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const links = linksForRole(role);
 
   return (
     <nav
       className="flex gap-1 overflow-x-auto p-3 md:min-h-0 md:flex-1 md:flex-col md:overflow-x-visible md:overflow-y-auto"
       aria-label="التنقل الرئيسي"
     >
-      {links.map(({ href, label, icon: Icon }) => {
+      {adminLinks.map(({ href, label, icon: Icon }) => {
         const active = isNavActive(pathname, href);
         return (
           <Link

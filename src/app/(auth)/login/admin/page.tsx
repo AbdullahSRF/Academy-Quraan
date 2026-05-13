@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { Shield } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
@@ -36,18 +35,6 @@ export default function AdminLoginPage() {
       </div>
 
       <LoginCrossLinks currentHref="/login/admin" />
-
-      <p className="text-center text-xs font-bold text-muted">
-        لست مشرفًا؟{" "}
-        <Link href="/login/student" className="text-primary underline-offset-2 hover:underline">
-          دخول الطالب
-        </Link>{" "}
-        أو{" "}
-        <Link href="/login/parent" className="text-primary underline-offset-2 hover:underline">
-          ولي الأمر
-        </Link>
-        .
-      </p>
     </div>
   );
 }

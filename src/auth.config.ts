@@ -4,34 +4,19 @@ import { getAuthSecret } from "@/lib/auth-env";
 
 export type AppRole = "ADMIN" | "STUDENT" | "PARENT";
 
-/** حقول التصفّح كمستخدم آخر — تُعرّف منفصلة لأن دمج NextAuth مع `DefaultSession["user"]` يضيّق النوع إلى `string` ويمنع `null`. */
-type SessionUserImpersonation = {
-  impersonatorId: string | null;
-  impersonatorName: string | null;
-};
-
 const DAY = 24 * 60 * 60;
 
 declare module "next-auth" {
   interface Session {
-    user: Omit<
-      NonNullable<DefaultSession["user"]>,
-      "impersonatorId" | "impersonatorName"
-    > & {
+    user: Omit<NonNullable<DefaultSession["user"]>, never> & {
       id: string;
       role: AppRole;
-      /** معرّف المشرف الأصلي عند التصفح كطالب/ولي أمر */
-      impersonatorId: string | null;
-      impersonatorName: string | null;
     };
   }
 
   interface User {
     role: AppRole;
     remember?: boolean;
-    impersonatorId?: string;
-    impersonatorName?: string | null;
-    impersonatorEmail?: string | null;
   }
 }
 
@@ -40,9 +25,6 @@ declare module "@auth/core/jwt" {
     id: string;
     role: AppRole;
     remember?: string | boolean;
-    impersonatorId?: string;
-    impersonatorName?: string;
-    impersonatorEmail?: string;
   }
 }
 
@@ -55,31 +37,13 @@ export default {
     maxAge: 90 * 24 * 60 * 60,
   },
   pages: {
-    signIn: "/login",
+    signIn: "/login/admin",
   },
   callbacks: {
     async signIn() {
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
-      const payload = session as { endImpersonation?: boolean } | undefined;
-
-      if (trigger === "update" && payload?.endImpersonation === true) {
-        if (typeof token.impersonatorId === "string" && token.impersonatorId.length > 0) {
-          token.id = token.impersonatorId;
-          token.role = "ADMIN";
-          token.name = typeof token.impersonatorName === "string" ? token.impersonatorName : token.name;
-          token.email = typeof token.impersonatorEmail === "string" ? token.impersonatorEmail : token.email;
-          delete token.impersonatorId;
-          delete token.impersonatorName;
-          delete token.impersonatorEmail;
-        }
-        const remember = token.remember === true || token.remember === "1";
-        const maxAgeSec = remember ? 90 * DAY : 7 * DAY;
-        token.exp = Math.floor(Date.now() / 1000) + maxAgeSec;
-        return token;
-      }
-
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id!;
         token.role = user.role;
@@ -91,14 +55,6 @@ export default {
 
         token.remember = remember ? "1" : "0";
 
-        if (user.impersonatorId) {
-          token.impersonatorId = user.impersonatorId;
-          token.impersonatorName = user.impersonatorName ?? undefined;
-          token.impersonatorEmail = user.impersonatorEmail ?? undefined;
-          token.exp = Math.floor(Date.now() / 1000) + 8 * 60 * 60;
-          return token;
-        }
-
         const maxAgeSec = remember ? 90 * DAY : 7 * DAY;
         token.exp = Math.floor(Date.now() / 1000) + maxAgeSec;
       }
@@ -109,11 +65,6 @@ export default {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as AppRole;
-        const impersonation = session.user as unknown as SessionUserImpersonation;
-        impersonation.impersonatorId =
-          typeof token.impersonatorId === "string" ? token.impersonatorId : null;
-        impersonation.impersonatorName =
-          typeof token.impersonatorName === "string" ? token.impersonatorName : null;
       }
       return session;
     },

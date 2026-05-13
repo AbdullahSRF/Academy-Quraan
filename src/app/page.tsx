@@ -10,9 +10,7 @@ import { logger } from "@/lib/logger";
 
 function dashboardForRole(role: string) {
   if (role === "ADMIN") return "/admin";
-  if (role === "STUDENT") return "/student";
-  if (role === "PARENT") return "/parent";
-  return "/login";
+  return "/login/admin";
 }
 
 const features = [
@@ -39,7 +37,7 @@ const features = [
 ] as const;
 
 const steps = [
-  { n: "1", title: "تواصل مع الأكاديمية", desc: "يُنشأ لك حساب مناسب (مشرف / طالب / ولي أمر)." },
+  { n: "1", title: "تواصل مع الأكاديمية", desc: "يُنشأ لك حساب مشرف بصلاحية الدخول للوحة." },
   { n: "2", title: "استلم بيانات الدخول", desc: "بريد وكلمة مرور آمنة عبر القنوات الرسمية." },
   { n: "3", title: "ابدأ الاستخدام", desc: "من الجوال أو المتصفح — مع دعم التثبيت كتطبيق (PWA)." },
 ] as const;
@@ -80,17 +78,8 @@ export default async function HomePage() {
           <span className="text-lg font-bold tracking-tight text-foreground sm:text-xl">أكاديمية التحفيظ</span>
           <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
             <ThemeToggle />
-            <Button asChild variant="ghost" size="sm" className="hidden px-2 text-xs font-bold text-muted sm:inline-flex">
-              <Link href="/login/admin">مشرف</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm" className="hidden px-2 text-xs font-bold text-muted md:inline-flex">
-              <Link href="/login/student">طالب</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm" className="hidden px-2 text-xs font-bold text-muted md:inline-flex">
-              <Link href="/login/parent">ولي أمر</Link>
-            </Button>
             <Button asChild variant="default" size="sm" className="min-w-[5.5rem] sm:min-w-[6.5rem]">
-              <Link href="/login">دخول</Link>
+              <Link href="/login/admin">دخول المشرف</Link>
             </Button>
           </div>
         </div>
@@ -107,12 +96,11 @@ export default async function HomePage() {
               إدارة الأكاديمية ببساطة وسرعة
             </h1>
             <p className="mt-6 text-pretty text-lg font-bold leading-relaxed text-muted sm:text-xl">
-              حضور يومي، حصص تسميع بالمناطق، فواتير وتقارير — بتجربة نظيفة وسريعة للمشرف ولي الأمر والطالب، مع دعم الموبايل
-              والوضع الليلي.
+              حضور يومي، حصص تسميع بالمناطق، فواتير وتقارير — لوحة للمشرف مع دعم الموبايل والوضع الليلي.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className="min-h-12 min-w-[12rem] shadow-lg">
-                <Link href="/login">دخول المنصة</Link>
+                <Link href="/login/admin">دخول المنصة</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="min-h-12">
                 <Link href="#features">استكشف المميزات</Link>
@@ -152,8 +140,7 @@ export default async function HomePage() {
                 عن الأكاديمية
               </h2>
               <p className="mt-4 text-base font-bold leading-relaxed text-muted">
-                منصة موحّدة تساعد المشرف على تنظيم الطلاب والحصص والمالية في يوم عمل واحد، مع لوحات مبسّطة لولي الأمر
-                والطالب لمتابعة التقدّم دون تعقيد.
+                منصة موحّدة تساعد المشرف على تنظيم الطلاب والحصص والمالية في يوم عمل واحد.
               </p>
               <ul className="mt-6 space-y-3 text-start">
                 {["واجهة سريعة وmobile-first", "دعم الوضع الفاتح والداكن", "قابل للتثبيت كتطبيق (PWA)"].map((t) => (
@@ -171,7 +158,7 @@ export default async function HomePage() {
                   لا يوجد تسجيل ذاتي عام. يتم إنشاء الحسابات من إدارة الأكاديمية لضمان الجودة والأمان.
                 </p>
                 <Button asChild variant="outline" className="w-full sm:w-auto">
-                  <Link href="/login">لدي بيانات دخول</Link>
+                  <Link href="/login/admin">لدي بيانات دخول</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -219,12 +206,11 @@ export default async function HomePage() {
               جاهز للبدء؟
             </h2>
             <p className="mt-4 text-base font-bold leading-relaxed text-muted">
-              إن كنت مشرفًا أو طالبًا أو ولي أمر: استخدم بيانات الدخول التي زودتك بها الأكاديمية. المنصة مصممة للجوال والوضع
-              الليلي والتثبيت كتطبيق.
+              استخدم بيانات الدخول التي زودتك بها الأكاديمية. المنصة مصممة للجوال والوضع الليلي والتثبيت كتطبيق.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className="min-h-12 min-w-[10rem]">
-                <Link href="/login">دخول المنصة</Link>
+                <Link href="/login/admin">دخول المنصة</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="min-h-12">
                 <Link href="#features">عرض المميزات</Link>
