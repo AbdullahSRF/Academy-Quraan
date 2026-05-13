@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/auth.config";
+import { loginErrorMessageFromSignInResult } from "@/lib/auth/login-client-errors";
 import { normalizeLoginEmail, normalizeLoginPassword } from "@/lib/auth/login-normalize";
 
 export type LoginVisualVariant = "default" | "admin";
@@ -68,15 +69,7 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
 
     if (res?.error) {
       setLoading(false);
-      if (res.error === "Configuration") {
-        setError("إعداد المصادقة غير مكتمل على الخادم (تحقق من AUTH_SECRET وNEXTAUTH_URL).");
-        return;
-      }
-      if (res.error === "AccessDenied") {
-        setError("تم رفض الدخول. هذه المنصة للمشرفين فقط.");
-        return;
-      }
-      setError("البريد أو كلمة المرور غير صحيحة.");
+      setError(loginErrorMessageFromSignInResult(res));
       return;
     }
 

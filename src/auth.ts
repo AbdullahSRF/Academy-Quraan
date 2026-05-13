@@ -3,10 +3,18 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
+import type { User } from "@prisma/client";
+import { CredentialsSignin } from "next-auth";
 import authConfig from "@/auth.config";
 import prisma from "@/infrastructure/db/prisma";
 import type { AppRole } from "@/auth.config";
 import { normalizeLoginEmail, normalizeLoginPassword, coerceCredentialField } from "@/lib/auth/login-normalize";
+import {
+  AccountDisabledSignin,
+  InvalidCredentialsSignin,
+  InvalidLoginFormSignin,
+  NotAdminSignin,
+} from "@/lib/auth/credentials-login-errors";
 import { logger } from "@/lib/logger";
 
 const credentialsSchema = z.object({
@@ -51,32 +59,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const email = normalizeLoginEmail(emailRaw);
           const password = normalizeLoginPassword(passwordRaw);
           const parsed = credentialsSchema.safeParse({ email, password });
-          if (!parsed.success) return null;
+          if (!parsed.success) {
+            throw new InvalidLoginFormSignin();
+          }
 
-          let user = await prisma.user.findUnique({
-            where: { email: parsed.data.email },
-          });
+          let user: User | null = null;
+          try {
+            user = await prisma.user.findFirst({
+              where: { email: { equals: parsed.data.email, mode: "insensitive" } },
+            });
+          } catch (e) {
+            logger.warn("credentials: case-insensitive email lookup skipped", { err: String(e) });
+          }
           if (!user) {
-            try {
-              user = await prisma.user.findFirst({
-                where: { email: { equals: parsed.data.email, mode: "insensitive" } },
-              });
-            } catch (e) {
-              logger.warn("credentials: case-insensitive email lookup skipped", { err: String(e) });
+            user = await prisma.user.findUnique({
+              where: { email: parsed.data.email },
+            });
+          }
+
+          if (!user?.passwordHash) {
+            throw new InvalidCredentialsSignin();
+          }
+          if (user.disabled) {
+            throw new AccountDisabledSignin();
+          }
+
+          const pwd = parsed.data.password;
+          const variants = Array.from(new Set([pwd, pwd.trim()].filter((p) => p.length > 0)));
+          let valid = false;
+          for (const candidate of variants) {
+            if (await bcrypt.compare(candidate, user.passwordHash)) {
+              valid = true;
+              break;
             }
           }
-
-          if (!user?.passwordHash) return null;
-          if (user.disabled) return null;
-
-          let valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
-          if (!valid && parsed.data.password !== parsed.data.password.trim()) {
-            valid = await bcrypt.compare(parsed.data.password.trim(), user.passwordHash);
+          if (!valid) {
+            throw new InvalidCredentialsSignin();
           }
-          if (!valid) return null;
 
           if (user.role !== "ADMIN") {
-            return null;
+            throw new NotAdminSignin();
           }
 
           return {
@@ -88,6 +110,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             remember,
           };
         } catch (e) {
+          if (e instanceof CredentialsSignin) {
+            throw e;
+          }
           if (isLikelyDatabaseConnectivityError(e)) {
             logger.error("credentials authorize: database unreachable", { err: String(e) });
           } else {
