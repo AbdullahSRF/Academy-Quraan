@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "@/infrastructure/db/prisma";
 import {
   FIXED_SUBSCRIPTION_PLANS,
+  compareFixedPlanCodesForSort,
   fixedPlanCodesForDb,
   getFixedPlanByCode,
 } from "@/features/subscriptions/fixed-plans";
@@ -65,11 +66,11 @@ export async function syncFixedSubscriptionPlans(): Promise<void> {
 export async function listFixedSubscriptionPlansWithCounts() {
   try {
     await syncFixedSubscriptionPlans();
-    return prisma.subscriptionPlan.findMany({
+    const rows = await prisma.subscriptionPlan.findMany({
       where: { active: true, code: { in: fixedPlanCodesForDb() } },
-      orderBy: { priceMonthly: "asc" },
       include: { _count: { select: { subscriptions: true } } },
     });
+    return [...rows].sort((a, b) => compareFixedPlanCodesForSort(a.code, b.code));
   } catch (e) {
     if (isMissingTable(e)) return [];
     throw e;

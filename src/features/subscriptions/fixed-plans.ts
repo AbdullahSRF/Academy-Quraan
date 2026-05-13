@@ -55,6 +55,15 @@ export function isFixedSubscriptionPlanCode(code: string | null | undefined): co
   return !!code && FIXED_SUBSCRIPTION_PLAN_CODES.includes(code as FixedSubscriptionPlanCode);
 }
 
+/** ترتيب عرض ثابت: 8 → 12 → 16 → 24 (مستقل عن السعر أو ترتيب الأحرف في قاعدة البيانات). */
+export function compareFixedPlanCodesForSort(aCode: string | null, bCode: string | null): number {
+  const rank = (c: string | null) => {
+    if (!c || !isFixedSubscriptionPlanCode(c)) return FIXED_SUBSCRIPTION_PLAN_CODES.length + 1;
+    return FIXED_SUBSCRIPTION_PLAN_CODES.indexOf(c);
+  };
+  return rank(aCode) - rank(bCode);
+}
+
 export function getFixedPlanByCode(code: string | null | undefined): FixedSubscriptionPlanDef | undefined {
   if (!code || !isFixedSubscriptionPlanCode(code)) return undefined;
   return byCode.get(code);

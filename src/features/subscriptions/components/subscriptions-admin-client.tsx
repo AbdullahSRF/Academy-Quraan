@@ -56,7 +56,7 @@ export function SubscriptionsAdminClient({
           الباقات المعتمدة
         </h2>
         <p className="text-sm font-bold text-muted">
-          قائمة ثابتة بالنظام — أربع باقات فقط (ج.م). لا يمكن إضافة أو تعديل الباقات من هذه الصفحة.
+          أربع باقات ثابتة بالنظام (ج.م) — مرتبة: 8 حصص، ثم 12، ثم 16، ثم 24. لا يوجد إنشاء أو تعديل باقات من هذه الصفحة.
         </p>
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
           <table className="w-full min-w-[520px] border-collapse text-start text-sm font-bold">
