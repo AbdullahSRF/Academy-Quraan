@@ -60,7 +60,7 @@ export function SubscriptionsAdminClient({
           أربع باقات ثابتة بالنظام (ج.م) — مرتبة: 8 حصص، ثم 12، ثم 16، ثم 24. لا يوجد إنشاء أو تعديل باقات من هذه الصفحة.
         </p>
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[520px] border-collapse text-start text-sm font-bold">
+          <table className="w-full min-w-[520px] border-collapse text-center text-sm font-bold">
             <thead>
               <tr className="border-b border-border bg-muted-bg/80">
                 <th className="px-4 py-3">اسم الباقة</th>
@@ -82,9 +82,7 @@ export function SubscriptionsAdminClient({
                     <td className="px-4 py-3 text-foreground">{p.name}</td>
                     <td className="px-4 py-3 tabular-nums text-muted">{p.sessionsPerMonth ?? "—"}</td>
                     <td className="px-4 py-3 tabular-nums text-muted">
-                      <PriceAmount>
-                        {p.priceMonthly} ج.م
-                      </PriceAmount>
+                      <PriceAmount>{p.priceMonthly} ج.م</PriceAmount>
                     </td>
                     <td className="px-4 py-3 tabular-nums text-muted">{p._count.subscriptions}</td>
                   </tr>
