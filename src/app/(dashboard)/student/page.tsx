@@ -10,7 +10,7 @@ import { getActiveStudentSubscriptionSummary } from "@/features/subscriptions/da
 import prisma from "@/infrastructure/db/prisma";
 import { redirect } from "next/navigation";
 import { AdminInboxSection } from "@/components/messaging/admin-inbox-section";
-import { formatEgp } from "@/lib/format-egp";
+import { PriceAmount } from "@/components/ui/price-amount";
 
 const ratingAr: Record<string, string> = {
   EXCELLENT: "ممتاز",
@@ -129,9 +129,7 @@ export default async function StudentDashboardPage() {
               {invs.map((inv) => (
                 <li key={inv.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted-bg/30 px-3 py-2">
                   <span className="text-foreground">{inv.title}</span>
-                  <span className="tabular-nums text-muted" dir="ltr">
-                    {formatEgp(inv.amount)}
-                  </span>
+                  <PriceAmount className="tabular-nums text-muted">{inv.amount.toString()}</PriceAmount>
                   <Badge variant={inv.status === "OVERDUE" ? "warning" : "secondary"}>{invStatus[inv.status] ?? inv.status}</Badge>
                 </li>
               ))}
@@ -178,9 +176,7 @@ export default async function StudentDashboardPage() {
                 </p>
                 <p className="text-muted">
                   السعر المرجعي:{" "}
-                  <span className="text-foreground" dir="ltr">
-                    {formatEgp(subSummary.priceMonthly, { monthly: true })}
-                  </span>
+                  <PriceAmount className="text-foreground">{subSummary.priceMonthly} ج.م شهريًا</PriceAmount>
                 </p>
               </>
             ) : (

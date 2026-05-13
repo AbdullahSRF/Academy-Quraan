@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { nativeSelectClassName } from "@/lib/native-form-classes";
+import { PriceAmount } from "@/components/ui/price-amount";
 import { assignStudentSubscriptionFormAction, updateStudentSubscriptionStatusFormAction } from "@/features/subscriptions/actions";
 import type { StudentSubscriptionClient, SubscriptionPlanClient } from "@/features/subscriptions/serialize-for-client";
-import { formatEgp } from "@/lib/format-egp";
 
 const statusAr: Record<string, string> = {
   ACTIVE: "نشط",
@@ -31,7 +31,7 @@ function Submit({ label }: { label: string }) {
 }
 
 function planOptionLabel(p: SubscriptionPlanClient): string {
-  return `${p.name} — ${formatEgp(p.priceMonthly, { monthly: true })}`;
+  return `${p.name} — ${p.priceMonthly} ج.م شهريًا`;
 }
 
 export function SubscriptionsAdminClient({
@@ -57,7 +57,7 @@ export function SubscriptionsAdminClient({
           الباقات المعتمدة
         </h2>
         <p className="text-sm font-bold text-muted">
-          أربع باقات ثابتة بالنظام بالجنيه المصري — مرتبة: 8 حصص، ثم 12، ثم 16، ثم 24. لا يوجد إنشاء أو تعديل باقات من هذه الصفحة.
+          أربع باقات ثابتة بالنظام (ج.م) — مرتبة: 8 حصص، ثم 12، ثم 16، ثم 24. لا يوجد إنشاء أو تعديل باقات من هذه الصفحة.
         </p>
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
           <table className="w-full min-w-[520px] border-collapse text-start text-sm font-bold">
@@ -81,8 +81,10 @@ export function SubscriptionsAdminClient({
                   <tr key={p.id} className="border-b border-border odd:bg-muted-bg/20">
                     <td className="px-4 py-3 text-foreground">{p.name}</td>
                     <td className="px-4 py-3 tabular-nums text-muted">{p.sessionsPerMonth ?? "—"}</td>
-                    <td className="px-4 py-3 tabular-nums text-muted" dir="ltr">
-                      {formatEgp(p.priceMonthly)}
+                    <td className="px-4 py-3 tabular-nums text-muted">
+                      <PriceAmount>
+                        {p.priceMonthly} ج.م
+                      </PriceAmount>
                     </td>
                     <td className="px-4 py-3 tabular-nums text-muted">{p._count.subscriptions}</td>
                   </tr>
@@ -123,7 +125,7 @@ export function SubscriptionsAdminClient({
             </div>
             <div className="space-y-2">
               <Label htmlFor="sub-plan">الباقة</Label>
-              <select id="sub-plan" name="planId" required className={nativeSelectClassName}>
+              <select id="sub-plan" name="planId" required dir="rtl" className={nativeSelectClassName}>
                 <option value="">— اختر —</option>
                 {plans.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -183,8 +185,8 @@ export function SubscriptionsAdminClient({
                       {s.plan.sessionsPerMonth != null ? (
                         <span className="block text-xs font-bold">الحصص الشهرية: {s.plan.sessionsPerMonth}</span>
                       ) : null}
-                      <span className="block text-xs font-bold" dir="ltr">
-                        {formatEgp(s.plan.priceMonthly, { monthly: true })}
+                      <span className="block text-xs font-bold">
+                        <PriceAmount>{s.plan.priceMonthly} ج.م شهريًا</PriceAmount>
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">{statusAr[s.status] ?? s.status}</td>

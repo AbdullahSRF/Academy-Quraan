@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { loadParentDashboardRows } from "@/features/parent/parent-dashboard-data";
 import { AdminInboxSection } from "@/components/messaging/admin-inbox-section";
-import { formatEgp } from "@/lib/format-egp";
+import { PriceAmount } from "@/components/ui/price-amount";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -92,7 +92,11 @@ export default async function ParentDashboardPage() {
                         {c.subscriptionSessionsPerMonth != null ? (
                           <p>الحصص الشهرية المستهدفة: {c.subscriptionSessionsPerMonth}</p>
                         ) : null}
-                        {c.subscriptionPriceLabel ? <p>السعر المرجعي: {c.subscriptionPriceLabel}</p> : null}
+                        {c.subscriptionPriceLabel ? (
+                          <p>
+                            السعر المرجعي: <PriceAmount className="text-foreground">{c.subscriptionPriceLabel}</PriceAmount>
+                          </p>
+                        ) : null}
                       </>
                     ) : (
                       <p>لا يوجد اشتراك نشط مسجل لهذا الطالب.</p>
@@ -163,9 +167,7 @@ export default async function ParentDashboardPage() {
                             className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted-bg/30 px-3 py-2 text-xs font-bold"
                           >
                             <span className="text-foreground">{inv.title}</span>
-                            <span className="tabular-nums text-primary" dir="ltr">
-                              {formatEgp(inv.amount)}
-                            </span>
+                            <PriceAmount className="tabular-nums text-primary">{inv.amount}</PriceAmount>
                             <Badge variant={inv.status === "OVERDUE" ? "warning" : "outline"}>{invStatus[inv.status] ?? inv.status}</Badge>
                             {inv.dueDate ? (
                               <span className="w-full text-[10px] text-muted" dir="ltr">

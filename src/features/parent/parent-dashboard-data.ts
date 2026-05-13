@@ -2,7 +2,6 @@ import prisma from "@/infrastructure/db/prisma";
 import { listChildrenForParentUser } from "@/features/parent/data";
 import { loadStudentMemorizationDashboard } from "@/features/memorization-v2/data/student-dashboard";
 import { getActiveStudentSubscriptionSummary } from "@/features/subscriptions/data";
-import { formatEgp } from "@/lib/format-egp";
 
 export type ParentChildDashboardRow = {
   id: string;
@@ -78,7 +77,9 @@ export async function loadParentDashboardRows(userId: string): Promise<ParentChi
         recentSessions,
         subscriptionPlanName: subSummary?.planName ?? null,
         subscriptionSessionsPerMonth: subSummary?.sessionsPerMonth ?? null,
-        subscriptionPriceLabel: subSummary ? formatEgp(subSummary.priceMonthly, { monthly: true }) : null,
+        subscriptionPriceLabel: subSummary
+          ? `${subSummary.priceMonthly} ج.م شهريًا`
+          : null,
       };
     }),
   );

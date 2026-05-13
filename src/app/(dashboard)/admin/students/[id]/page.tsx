@@ -11,7 +11,7 @@ import { StudentAccountPanel } from "@/features/students/components/student-acco
 import { MemorizationDashboardBody } from "@/features/memorization-v2/components/memorization-dashboard-body";
 import { countSessionsByUtcMonth, loadStudentMemorizationDashboard } from "@/features/memorization-v2/data/student-dashboard";
 import { getStudentProfileBundle, sumPaymentsForInvoices } from "@/features/students/student-profile-data";
-import { formatEgp } from "@/lib/format-egp";
+import { PriceAmount } from "@/components/ui/price-amount";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -225,8 +225,8 @@ export default async function StudentProfilePage({ params }: PageProps) {
                     {invoices.map((inv) => (
                       <tr key={inv.id} className="border-b border-border odd:bg-muted-bg/25">
                         <td className="px-4 py-3 text-foreground">{inv.title}</td>
-                        <td className="px-4 py-3" dir="ltr">
-                          {formatEgp(inv.amount)}
+                        <td className="px-4 py-3">
+                          <PriceAmount>{inv.amount.toString()}</PriceAmount>
                         </td>
                         <td className="px-4 py-3">
                           <Badge

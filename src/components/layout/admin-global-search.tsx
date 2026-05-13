@@ -4,8 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { PriceAmount } from "@/components/ui/price-amount";
 import { cn } from "@/lib/utils";
-import { formatEgp } from "@/lib/format-egp";
 
 type AdminSearchStudentHit = { id: string; fullName: string; status: string };
 type AdminSearchInvoiceHit = {
@@ -145,9 +145,7 @@ export function AdminGlobalSearch({ className }: { className?: string }) {
                           <span className="text-foreground">{inv.title}</span>
                           <span className="mt-0.5 block text-xs font-bold text-muted">
                             {inv.studentFullName} ·{" "}
-                            <span dir="ltr" className="tabular-nums">
-                              {formatEgp(inv.amount)}
-                            </span>
+                            <PriceAmount className="text-xs font-bold text-muted">{inv.amount}</PriceAmount>
                           </span>
                         </Link>
                       </li>
