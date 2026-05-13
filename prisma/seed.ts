@@ -1,5 +1,5 @@
-import { PrismaClient, Role } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+import { upsertAdminUserFromEnv } from "../src/lib/auth/upsert-admin-from-env";
 import { globalAyahIndex } from "../src/lib/quran/verse-counts";
 import { syncFixedSubscriptionPlans } from "../src/features/subscriptions/data";
 
@@ -62,16 +62,7 @@ async function bootstrapMemorizationZonesForAllStudents() {
   }
 }
 
-function adminEmailFromEnv() {
-  const raw = process.env.ADMIN_EMAIL ?? "admin@academy.local";
-  return raw.trim().toLowerCase();
-}
-
 async function main() {
-  const email = adminEmailFromEnv();
-  const password = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
-  const passwordHash = await bcrypt.hash(password, 12);
-
   if ((await prisma.academySettings.count()) === 0) {
     await prisma.academySettings.create({
       data: {
@@ -81,42 +72,8 @@ async function main() {
     });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-
-  if (existing) {
-    await prisma.user.update({
-      where: { id: existing.id },
-      data: {
-        passwordHash,
-        role: Role.ADMIN,
-        emailVerified: new Date(),
-      },
-    });
-    const hasProfile = await prisma.profile.findUnique({ where: { userId: existing.id } });
-    if (!hasProfile) {
-      await prisma.profile.create({ data: { userId: existing.id } });
-    }
-    console.log("تم تحديث كلمة مرور المشرف وربطها بـ .env الحالي:", email);
-    await bootstrapMemorizationZonesForAllStudents();
-    await seedSubscriptionDefaults();
-    return;
-  }
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      name: "الشيخ عبدالله مخلوف",
-      role: Role.ADMIN,
-      passwordHash,
-      emailVerified: new Date(),
-    },
-  });
-
-  await prisma.profile.create({
-    data: { userId: user.id },
-  });
-
-  console.log("تم إنشاء حساب المشرف:", email);
+  await upsertAdminUserFromEnv(prisma);
+  console.log("تم مزامنة حساب المشرف من .env (ADMIN_EMAIL / ADMIN_PASSWORD).");
   console.log("غيّر ADMIN_PASSWORD في الإنتاج ولا ترفع .env إلى Git.");
 
   await bootstrapMemorizationZonesForAllStudents();
