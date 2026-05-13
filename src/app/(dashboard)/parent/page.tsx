@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { loadParentDashboardRows } from "@/features/parent/parent-dashboard-data";
+import { AdminInboxSection } from "@/components/messaging/admin-inbox-section";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -52,6 +53,8 @@ export default async function ParentDashboardPage() {
         description="حضور، واجبات، آخر التسميع، التقييمات، والفواتير المفتوحة — للاطلاع؛ تسجيل الحصة من حساب المشرف."
       />
 
+      <AdminInboxSection userId={session.user.id} />
+
       {enriched.length === 0 ? (
         <Card className="border-dashed border-amber-500/40 bg-amber-500/10">
           <CardHeader>
@@ -81,6 +84,19 @@ export default async function ParentDashboardPage() {
                   <CardDescription className="font-bold text-muted">{c.level ? `المستوى: ${c.level}` : "—"}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col gap-5">
+                  <div className="space-y-1 border-b border-border pb-3 text-sm font-bold text-muted">
+                    {c.subscriptionPlanName ? (
+                      <>
+                        <p className="text-foreground">الاشتراك: {c.subscriptionPlanName}</p>
+                        {c.subscriptionSessionsPerMonth != null ? (
+                          <p>الحصص الشهرية المستهدفة: {c.subscriptionSessionsPerMonth}</p>
+                        ) : null}
+                        {c.subscriptionPriceLabel ? <p>السعر المرجعي: {c.subscriptionPriceLabel}</p> : null}
+                      </>
+                    ) : (
+                      <p>لا يوجد اشتراك نشط مسجل لهذا الطالب.</p>
+                    )}
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-xl border border-border bg-muted-bg/40 p-3">
                       <p className="text-xs font-bold uppercase text-muted">التغطية</p>

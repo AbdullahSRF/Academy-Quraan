@@ -17,16 +17,19 @@ import { DashboardMobileNav } from "@/components/layout/dashboard-mobile-nav";
 import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import { useDashboardUiStore } from "@/store/dashboard-ui-store";
 import type { AppRole } from "@/auth.config";
+import { ImpersonationStrip } from "@/components/auth/impersonation-strip";
 
 export function DashboardAppFrame({
   role,
   userName,
   userEmail,
+  impersonation,
   children,
 }: {
   role: AppRole;
   userName: string | null | undefined;
   userEmail: string | null | undefined;
+  impersonation?: { adminLabel: string } | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -73,6 +76,8 @@ export function DashboardAppFrame({
               {display}
             </span>
           </header>
+
+          {impersonation ? <ImpersonationStrip adminLabel={impersonation.adminLabel} /> : null}
 
           <main className="site-main flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <motion.div

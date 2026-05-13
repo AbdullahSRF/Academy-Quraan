@@ -7,6 +7,7 @@ import { StatTile } from "@/components/dashboard/stat-tile";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import prisma from "@/infrastructure/db/prisma";
+import { getActiveSubscriptionsByFixedPlan } from "@/features/subscriptions/data";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -44,7 +45,8 @@ async function memorizationSessionsLast30Days(): Promise<number> {
 export default async function AdminReportsPage() {
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-  const [studentTotal, byStatus, attendance30, memo30, memoZones30, invoicesOpen, revenue30, recentSessions] = await Promise.all([
+  const [studentTotal, byStatus, attendance30, memo30, memoZones30, invoicesOpen, revenue30, recentSessions, subscriptionsByPlan] =
+    await Promise.all([
     prisma.student.count({ where: { NOT: { status: "ARCHIVED" } } }),
     prisma.student.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.attendance.count({
@@ -83,6 +85,7 @@ export default async function AdminReportsPage() {
         throw e;
       }
     })(),
+    getActiveSubscriptionsByFixedPlan(),
   ]);
 
   const payCount = revenue30._count._all;
@@ -134,6 +137,33 @@ export default async function AdminReportsPage() {
           <StatTile label="سجل حفظ قديم (30 يومًا)" value={memo30} tone="stone" />
           <StatTile label="حصص مناطق (30 يومًا)" value={memoZones30} hint="مكتملة" hintInline />
           <StatTile label="فواتير مفتوحة" value={invoicesOpen} tone="amber" />
+        </div>
+      </section>
+
+      <section aria-labelledby="rep-subscriptions" className="space-y-3">
+        <h2 id="rep-subscriptions" className="text-lg font-bold text-foreground">
+          الاشتراكات النشطة حسب الباقة
+        </h2>
+        <p className="text-sm font-bold text-muted">باقات شهرية ثابتة (ج.م) — عدد الطلاب الذين لديهم اشتراك نشط لكل باقة.</p>
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+          <table className="w-full min-w-[360px] border-collapse text-start text-sm font-bold">
+            <thead>
+              <tr className="border-b border-border bg-muted-bg/80">
+                <th className="px-4 py-3">الباقة</th>
+                <th className="px-4 py-3">الحصص الشهرية</th>
+                <th className="px-4 py-3">اشتراكات نشطة</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subscriptionsByPlan.map((row) => (
+                <tr key={row.planLabel} className="border-b border-border odd:bg-muted-bg/25">
+                  <td className="px-4 py-3 text-foreground">{row.planLabel}</td>
+                  <td className="px-4 py-3 tabular-nums text-muted">{row.sessionsPerMonth}</td>
+                  <td className="px-4 py-3 tabular-nums text-muted">{row.activeCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

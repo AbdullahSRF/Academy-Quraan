@@ -55,7 +55,9 @@ export default async function AdminStudentsPage({ searchParams }: PageProps) {
       <Card>
         <CardHeader>
           <CardTitle>إضافة طالب</CardTitle>
-          <CardDescription>يُنشأ حساب داخلي للطالب (بريد داخلي)؛ يمكن لاحقًا ربط بريد حقيقي لتسجيل الدخول.</CardDescription>
+          <CardDescription>
+            يُنشأ حساب مستخدم للطالب ببريد وكلمة مرور مؤقتة؛ يمكن تعديلهما أو تعطيل الحساب لاحقًا من صفحة الطالب أو من «الحسابات» لأولياء الأمور.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <StudentForm mode="create" />

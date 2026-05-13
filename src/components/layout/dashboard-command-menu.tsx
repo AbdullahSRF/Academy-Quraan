@@ -14,6 +14,8 @@ import {
   Users,
   Wallet,
   Repeat,
+  UserCog,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,6 +89,14 @@ export function DashboardCommandMenu({ role }: { role: AppRole }) {
                 <CommandItem onSelect={() => go("/admin/students")}>
                   <Users className="size-4 text-primary" aria-hidden />
                   الطلاب
+                </CommandItem>
+                <CommandItem onSelect={() => go("/admin/user-accounts")}>
+                  <KeyRound className="size-4 text-primary" aria-hidden />
+                  حسابات الدخول
+                </CommandItem>
+                <CommandItem onSelect={() => go("/admin/accounts")}>
+                  <UserCog className="size-4 text-primary" aria-hidden />
+                  الحسابات وأولياء الأمور
                 </CommandItem>
                 <CommandItem onSelect={() => go("/admin/attendance")}>
                   <ClipboardList className="size-4 text-primary" aria-hidden />

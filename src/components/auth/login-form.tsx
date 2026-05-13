@@ -51,6 +51,7 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -65,6 +66,7 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
     const res = await signIn("credentials", {
       email: normalizeLoginEmail(email),
       password: normalizeLoginPassword(password),
+      remember: rememberMe ? "1" : "0",
       redirect: false,
       callbackUrl,
     });
@@ -165,6 +167,15 @@ export function LoginForm({ enforceRole, visualVariant = "default", submitLabel 
                 className="text-left"
               />
             </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-bold text-foreground">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="size-4 rounded border-border"
+              />
+              البقاء مسجّلاً على هذا الجهاز (جلسة أطول — يُنصح بتعطيلها على الأجهزة العامة)
+            </label>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col border-t border-border bg-muted-bg/30 px-6 py-5 sm:px-8">

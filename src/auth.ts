@@ -7,13 +7,9 @@ import authConfig from "@/auth.config";
 import prisma from "@/infrastructure/db/prisma";
 import type { AppRole } from "@/auth.config";
 import { normalizeLoginEmail, normalizeLoginPassword, coerceCredentialField } from "@/lib/auth/login-normalize";
+import { IMPERSONATION_SIGNIN_EMAIL } from "@/lib/auth/impersonation-constants";
+import { verifyImpersonationToken } from "@/lib/auth/impersonation-token";
 import { logger } from "@/lib/logger";
-
-declare module "next-auth" {
-  interface User {
-    role: AppRole;
-  }
-}
 
 const credentialsSchema = z.object({
   email: z.string().min(1).email(),
@@ -29,6 +25,12 @@ function isLikelyDatabaseConnectivityError(e: unknown): boolean {
   return /Can't reach database server|connection refused|ECONNREFUSED|ETIMEDOUT|timeout/i.test(msg);
 }
 
+function parseRemember(raw: unknown): boolean {
+  const v = coerceCredentialField(raw);
+  if (v === "0" || v.toLowerCase() === "false") return false;
+  return true;
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
@@ -37,6 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: { label: "البريد", type: "email" },
         password: { label: "كلمة المرور", type: "password" },
+        remember: { label: "تذكرني", type: "text" },
       },
       authorize: async (credentials) => {
         try {
@@ -45,11 +48,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             raw?.email ?? raw?.Email ?? raw?.username ?? raw?.user ?? raw?.identifier,
           );
           const passwordRaw = coerceCredentialField(raw?.password ?? raw?.Password ?? raw?.pass);
+          const remember = parseRemember(raw?.remember);
 
           const email = normalizeLoginEmail(emailRaw);
           const password = normalizeLoginPassword(passwordRaw);
           const parsed = credentialsSchema.safeParse({ email, password });
           if (!parsed.success) return null;
+
+          if (parsed.data.email === IMPERSONATION_SIGNIN_EMAIL) {
+            const payload = verifyImpersonationToken(parsed.data.password);
+            if (!payload) return null;
+
+            const [admin, target] = await Promise.all([
+              prisma.user.findUnique({ where: { id: payload.adminId } }),
+              prisma.user.findUnique({ where: { id: payload.targetUserId } }),
+            ]);
+
+            if (!admin || admin.role !== "ADMIN" || admin.disabled) return null;
+            if (!target?.passwordHash || target.disabled) return null;
+            if (target.role !== "STUDENT" && target.role !== "PARENT") return null;
+
+            return {
+              id: target.id,
+              email: target.email ? target.email.trim().toLowerCase() : undefined,
+              name: target.name ?? undefined,
+              image: target.image ?? undefined,
+              role: target.role as AppRole,
+              remember: true,
+              impersonatorId: admin.id,
+              impersonatorName: admin.name,
+              impersonatorEmail: admin.email,
+            };
+          }
 
           let user = await prisma.user.findUnique({
             where: { email: parsed.data.email },
@@ -65,6 +95,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           if (!user?.passwordHash) return null;
+          if (user.disabled) return null;
 
           let valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
           if (!valid && parsed.data.password !== parsed.data.password.trim()) {
@@ -78,6 +109,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: user.name ?? undefined,
             image: user.image ?? undefined,
             role: user.role as AppRole,
+            remember,
           };
         } catch (e) {
           if (isLikelyDatabaseConnectivityError(e)) {

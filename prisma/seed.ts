@@ -1,36 +1,16 @@
 import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { globalAyahIndex } from "../src/lib/quran/verse-counts";
+import { syncFixedSubscriptionPlans } from "../src/features/subscriptions/data";
 
 const prisma = new PrismaClient();
 
-/** مناطق حفظ افتراضية لكل طالب (إن لم تكن موجودة). */
+/** مزامنة الباقات الثابتة وربط اشتراك تجريبي اختياري. */
 async function seedSubscriptionDefaults() {
-  const planCount = await prisma.subscriptionPlan.count();
-  if (planCount === 0) {
-    await prisma.subscriptionPlan.createMany({
-      data: [
-        {
-          name: "حلقة شهرية — قياسي",
-          code: "MONTHLY_STD",
-          description: "باقة افتراضية من الـ seed",
-          priceMonthly: 300,
-          currency: "SAR",
-        },
-        {
-          name: "مراجعة مكثفة",
-          code: "REVIEW_PLUS",
-          description: "باقة أعلى سعرًا (مثال)",
-          priceMonthly: 450,
-          currency: "SAR",
-        },
-      ],
-    });
-    console.log("تم إنشاء باقات اشتراك افتراضية.");
-  }
+  await syncFixedSubscriptionPlans();
 
   const student = await prisma.student.findFirst({ orderBy: { fullName: "asc" } });
-  const plan = await prisma.subscriptionPlan.findFirst({ where: { active: true, code: "MONTHLY_STD" } });
+  const plan = await prisma.subscriptionPlan.findFirst({ where: { active: true, code: "ACADEMY_PLAN_8" } });
   if (!student || !plan) return;
 
   const hasActive = await prisma.studentSubscription.findFirst({
@@ -46,7 +26,7 @@ async function seedSubscriptionDefaults() {
       planId: plan.id,
       status: "ACTIVE",
       startedAt: start,
-      notes: "من الـ seed — عدّل أو ألغِ من لوحة الاشتراكات",
+      notes: "من الـ seed — يمكن تعديله من لوحة الاشتراكات",
     },
   });
   console.log("تم ربط اشتراك تجريبي لأول طالب:", student.fullName);

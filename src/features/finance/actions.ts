@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import prisma from "@/infrastructure/db/prisma";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 export type FinanceActionState = { ok: boolean; error: string | null };
 
 export async function createInvoiceAction(_prev: FinanceActionState, formData: FormData): Promise<FinanceActionState> {
+  if (!(await requireAdminSession())) return { ok: false, error: "غير مصرّح." };
   const studentId = String(formData.get("studentId") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const amountStr = String(formData.get("amount") ?? "").trim();

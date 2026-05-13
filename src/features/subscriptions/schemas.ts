@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-export const createPlanSchema = z.object({
-  name: z.string().trim().min(1, "الاسم مطلوب").max(120),
-  code: z.string().trim().max(40).optional().or(z.literal("")),
-  description: z.string().trim().max(500).optional().or(z.literal("")),
-  priceMonthly: z.coerce.number().min(0, "السعر غير صالح"),
-});
-
 export const assignSubscriptionSchema = z.object({
   studentId: z.string().min(1),
   planId: z.string().min(1),

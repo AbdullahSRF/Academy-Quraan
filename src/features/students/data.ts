@@ -1,5 +1,7 @@
 import { Role } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import prisma from "@/infrastructure/db/prisma";
+import type { StudentCreateWithCredentialsInput } from "@/features/students/schemas/student.schema";
 
 export async function listStudentsForAdmin() {
   return prisma.student.findMany({
@@ -8,7 +10,7 @@ export async function listStudentsForAdmin() {
       schedules: true,
       profile: {
         include: {
-          user: { select: { id: true, email: true } },
+          user: { select: { id: true, email: true, disabled: true } },
         },
       },
     },
@@ -30,29 +32,27 @@ export async function getStudentForAdmin(id: string) {
       schedules: true,
       profile: {
         include: {
-          user: { select: { id: true, email: true } },
+          user: { select: { id: true, email: true, disabled: true } },
         },
       },
     },
   });
 }
 
-export async function createStudentRecord(input: {
-  fullName: string;
-  age?: number;
-  phone?: string | null;
-  parentPhone?: string | null;
-  address?: string | null;
-  level?: string | null;
-  status: "REGULAR" | "PAUSED" | "FROZEN" | "WITHDRAWN" | "ARCHIVED";
-}) {
-  const internalEmail = `student.${crypto.randomUUID()}@internal.academy`;
+export async function createStudentRecord(input: StudentCreateWithCredentialsInput) {
+  const emailNorm = input.loginEmail.trim().toLowerCase();
+  const dup = await prisma.user.findUnique({ where: { email: emailNorm } });
+  if (dup) throw new Error("EMAIL_IN_USE");
+
+  const passwordHash = await bcrypt.hash(input.tempPassword, 12);
 
   const created = await prisma.user.create({
     data: {
-      email: internalEmail,
+      email: emailNorm,
       name: input.fullName,
       role: Role.STUDENT,
+      passwordHash,
+      disabled: false,
       profile: {
         create: {
           student: {

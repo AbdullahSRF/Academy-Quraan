@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ArchiveStudentButton } from "@/features/students/components/archive-student-button";
+import { StudentAccountPanel } from "@/features/students/components/student-account-panel";
 import { MemorizationDashboardBody } from "@/features/memorization-v2/components/memorization-dashboard-body";
 import { countSessionsByUtcMonth, loadStudentMemorizationDashboard } from "@/features/memorization-v2/data/student-dashboard";
 import { getStudentProfileBundle, sumPaymentsForInvoices } from "@/features/students/student-profile-data";
@@ -163,6 +164,24 @@ export default async function StudentProfilePage({ params }: PageProps) {
                     {paidTotal.toString()}
                   </span>
                 </p>
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-3">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">حساب تسجيل الدخول</CardTitle>
+                <CardDescription>إدارة البريد وكلمة المرور وتعطيل الدخول — للمشرف فقط.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {student.profile?.user ? (
+                  <StudentAccountPanel
+                    studentId={student.id}
+                    loginEmail={student.profile.user.email}
+                    disabled={student.profile.user.disabled}
+                    hasPassword={student.profile.user.hasPassword}
+                  />
+                ) : (
+                  <p className="text-sm font-bold text-muted">لا يوجد مستخدم مربوط بهذا الطالب.</p>
+                )}
               </CardContent>
             </Card>
           </div>

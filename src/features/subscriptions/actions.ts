@@ -3,51 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import prisma from "@/infrastructure/db/prisma";
-import { assignSubscriptionSchema, createPlanSchema, updateSubscriptionStatusSchema } from "@/features/subscriptions/schemas";
+import { assignSubscriptionSchema, updateSubscriptionStatusSchema } from "@/features/subscriptions/schemas";
+import { assertFixedPlanId } from "@/features/subscriptions/data";
 
 async function requireAdmin() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     throw new Error("غير مصرّح.");
   }
-}
-
-export async function createSubscriptionPlanFormAction(formData: FormData) {
-  try {
-    await requireAdmin();
-  } catch {
-    return { ok: false as const, error: "غير مصرّح." };
-  }
-
-  const parsed = createPlanSchema.safeParse({
-    name: formData.get("name"),
-    code: formData.get("code") || "",
-    description: formData.get("description") || "",
-    priceMonthly: formData.get("priceMonthly"),
-  });
-  if (!parsed.success) {
-    return { ok: false as const, error: parsed.error.flatten().formErrors.join(" ") || "بيانات غير صالحة." };
-  }
-
-  const code = parsed.data.code?.trim() || null;
-  try {
-    await prisma.subscriptionPlan.create({
-      data: {
-        name: parsed.data.name.trim(),
-        code: code && code.length > 0 ? code : null,
-        description: parsed.data.description?.trim() || null,
-        priceMonthly: parsed.data.priceMonthly,
-      },
-    });
-  } catch (e: unknown) {
-    const msg =
-      e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2002" ? "رمز الباقة مستخدم." : "تعذر الحفظ.";
-    return { ok: false as const, error: msg };
-  }
-
-  revalidatePath("/admin/subscriptions");
-  revalidatePath("/admin/finance");
-  return { ok: true as const, error: null as string | null };
 }
 
 export async function assignStudentSubscriptionFormAction(formData: FormData) {
@@ -66,6 +29,11 @@ export async function assignStudentSubscriptionFormAction(formData: FormData) {
   });
   if (!parsed.success) {
     return { ok: false as const, error: parsed.error.flatten().formErrors.join(" ") || "بيانات غير صالحة." };
+  }
+
+  const planOk = await assertFixedPlanId(parsed.data.planId);
+  if (!planOk) {
+    return { ok: false as const, error: "يجب اختيار إحدى الباقات المعتمدة فقط." };
   }
 
   const started = parsed.data.startedAt?.trim()
@@ -89,6 +57,9 @@ export async function assignStudentSubscriptionFormAction(formData: FormData) {
 
   revalidatePath("/admin/subscriptions");
   revalidatePath("/admin/finance");
+  revalidatePath("/student");
+  revalidatePath("/parent");
+  revalidatePath("/admin/reports");
   return { ok: true as const, error: null as string | null };
 }
 
@@ -117,5 +88,8 @@ export async function updateStudentSubscriptionStatusFormAction(formData: FormDa
 
   revalidatePath("/admin/subscriptions");
   revalidatePath("/admin/finance");
+  revalidatePath("/student");
+  revalidatePath("/parent");
+  revalidatePath("/admin/reports");
   return { ok: true as const, error: null as string | null };
 }

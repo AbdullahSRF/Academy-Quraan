@@ -60,14 +60,19 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  if (matched === "/admin" && role !== "ADMIN") {
+  /** المشرف يصل لكل لوحات التحكم؛ غير المشرف يقتصر على لوحته فقط. */
+  if (role === "ADMIN") {
+    return NextResponse.next();
+  }
+
+  if (matched === "/admin") {
     return NextResponse.redirect(new URL(dashboardPath(role ?? "STUDENT"), req.url));
   }
   if (matched === "/student" && role !== "STUDENT") {
-    return NextResponse.redirect(new URL(dashboardPath(role ?? "ADMIN"), req.url));
+    return NextResponse.redirect(new URL(dashboardPath(role ?? "PARENT"), req.url));
   }
   if (matched === "/parent" && role !== "PARENT") {
-    return NextResponse.redirect(new URL(dashboardPath(role ?? "ADMIN"), req.url));
+    return NextResponse.redirect(new URL(dashboardPath(role ?? "STUDENT"), req.url));
   }
 
   return NextResponse.next();

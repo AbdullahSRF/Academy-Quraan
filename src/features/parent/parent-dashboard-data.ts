@@ -1,6 +1,7 @@
 import prisma from "@/infrastructure/db/prisma";
 import { listChildrenForParentUser } from "@/features/parent/data";
 import { loadStudentMemorizationDashboard } from "@/features/memorization-v2/data/student-dashboard";
+import { getActiveStudentSubscriptionSummary } from "@/features/subscriptions/data";
 
 export type ParentChildDashboardRow = {
   id: string;
@@ -20,6 +21,9 @@ export type ParentChildDashboardRow = {
     dueDate: string | null;
   }[];
   recentSessions: { sessionDate: string; rating: string | null; homeworkNext: string | null }[];
+  subscriptionPlanName: string | null;
+  subscriptionSessionsPerMonth: number | null;
+  subscriptionPriceLabel: string | null;
 };
 
 export async function loadParentDashboardRows(userId: string): Promise<ParentChildDashboardRow[]> {
@@ -58,6 +62,7 @@ export async function loadParentDashboardRows(userId: string): Promise<ParentChi
         rating: s.rating,
         homeworkNext: s.homeworkNext,
       }));
+      const subSummary = await getActiveStudentSubscriptionSummary(c.id);
       return {
         id: c.id,
         fullName: c.fullName,
@@ -70,6 +75,11 @@ export async function loadParentDashboardRows(userId: string): Promise<ParentChi
         attendanceStrip,
         openInvoices,
         recentSessions,
+        subscriptionPlanName: subSummary?.planName ?? null,
+        subscriptionSessionsPerMonth: subSummary?.sessionsPerMonth ?? null,
+        subscriptionPriceLabel: subSummary
+          ? `${subSummary.priceMonthly} ج.م شهريًا`
+          : null,
       };
     }),
   );

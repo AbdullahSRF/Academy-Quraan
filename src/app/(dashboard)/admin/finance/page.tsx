@@ -85,7 +85,9 @@ export default async function AdminFinancePage() {
           <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 space-y-0">
             <div>
               <CardTitle>الاشتراكات (قاعدة البيانات)</CardTitle>
-              <CardDescription>باقات + اشتراكات طلاب — MRR تقريبي من مجموع أسعار الباقات للاشتراكات النشطة.</CardDescription>
+              <CardDescription>
+                أربع باقات ثابتة (ج.م) — MRR تقريبي من مجموع أسعار الباقات للاشتراكات النشطة المرتبطة بهذه الباقات فقط.
+              </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
               <Link href="/admin/subscriptions">إدارة الاشتراكات</Link>
@@ -106,7 +108,7 @@ export default async function AdminFinancePage() {
                 <span className="text-2xl tabular-nums text-amber-600 dark:text-amber-400">{fin.subscriptionsPaused}</span>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted-bg/40 px-4 py-3">
-                <span className="text-muted">MRR تقريبي</span>
+                <span className="text-muted">MRR تقريبي (ج.م)</span>
                 <span className="text-xl tabular-nums text-primary" dir="ltr">
                   {formatMoney(new Prisma.Decimal(fin.subscriptionsMrrApprox))}
                 </span>

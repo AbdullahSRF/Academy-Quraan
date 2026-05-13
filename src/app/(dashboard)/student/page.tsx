@@ -6,8 +6,10 @@ import { auth } from "@/auth";
 import { MemorizationDashboardBody } from "@/features/memorization-v2/components/memorization-dashboard-body";
 import { countSessionsByUtcMonth, loadStudentMemorizationDashboard } from "@/features/memorization-v2/data/student-dashboard";
 import { getStudentForUserId } from "@/features/students/data";
+import { getActiveStudentSubscriptionSummary } from "@/features/subscriptions/data";
 import prisma from "@/infrastructure/db/prisma";
 import { redirect } from "next/navigation";
+import { AdminInboxSection } from "@/components/messaging/admin-inbox-section";
 
 const ratingAr: Record<string, string> = {
   EXCELLENT: "ممتاز",
@@ -39,6 +41,7 @@ export default async function StudentDashboardPage() {
 
   const link = await getStudentForUserId(session.user.id);
   const student = link?.student;
+  const subSummary = student ? await getActiveStudentSubscriptionSummary(student.id) : null;
 
   let memorizationBlock: ReactNode = null;
   if (student) {
@@ -154,6 +157,37 @@ export default async function StudentDashboardPage() {
         title="لوحة الطالب"
         description={`مرحبًا ${session.user.name ?? student?.fullName ?? "طالبنا الكريم"}`}
       />
+
+      <AdminInboxSection userId={session.user.id} />
+
+      {student ? (
+        <Card className="border border-border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">الاشتراك</CardTitle>
+            <CardDescription>الباقة المعتمدة والحصص الشهرية</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm font-bold">
+            {subSummary ? (
+              <>
+                <p className="text-muted">
+                  الباقة: <span className="text-foreground">{subSummary.planName}</span>
+                </p>
+                <p className="text-muted">
+                  الحصص الشهرية: <span className="text-foreground">{subSummary.sessionsPerMonth}</span>
+                </p>
+                <p className="text-muted">
+                  السعر المرجعي:{" "}
+                  <span className="text-foreground" dir="ltr">
+                    {subSummary.priceMonthly} ج.م شهريًا
+                  </span>
+                </p>
+              </>
+            ) : (
+              <p className="text-muted">لا يوجد اشتراك نشط. يمكن للإدارة ربط باقة من صفحة الاشتراكات.</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {!student ? (
         <Card>

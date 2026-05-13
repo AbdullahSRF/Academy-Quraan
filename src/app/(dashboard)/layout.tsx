@@ -9,11 +9,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login");
   }
 
+  const impersonation =
+    session.user.impersonatorId != null
+      ? { adminLabel: session.user.impersonatorName?.trim() || "المشرف" }
+      : null;
+
   return (
     <DashboardShell
       role={session.user.role as AppRole}
       userName={session.user.name}
       userEmail={session.user.email}
+      impersonation={impersonation}
     >
       {children}
     </DashboardShell>
