@@ -7,10 +7,12 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ArchiveStudentButton } from "@/features/students/components/archive-student-button";
-import { StudentAccountPanel } from "@/features/students/components/student-account-panel";
 import { MemorizationDashboardBody } from "@/features/memorization-v2/components/memorization-dashboard-body";
 import { countSessionsByUtcMonth, loadStudentMemorizationDashboard } from "@/features/memorization-v2/data/student-dashboard";
 import { getStudentProfileBundle, sumPaymentsForInvoices } from "@/features/students/student-profile-data";
+import { listFixedSubscriptionPlansWithCounts } from "@/features/subscriptions/data";
+import { serializePlansForClient, serializeSubscriptionsForClient } from "@/features/subscriptions/serialize-for-client";
+import { StudentSubscriptionsPanel } from "@/features/subscriptions/components/student-subscriptions-panel";
 import { PriceAmount } from "@/components/ui/price-amount";
 
 const statusLabel: Record<string, string> = {
@@ -40,10 +42,16 @@ type PageProps = { params: Promise<{ id: string }> };
 
 export default async function StudentProfilePage({ params }: PageProps) {
   const { id } = await params;
-  const [bundle, dash] = await Promise.all([getStudentProfileBundle(id), loadStudentMemorizationDashboard(id)]);
+  const [bundle, dash, plansRaw] = await Promise.all([
+    getStudentProfileBundle(id),
+    loadStudentMemorizationDashboard(id),
+    listFixedSubscriptionPlansWithCounts(),
+  ]);
   if (!bundle) notFound();
 
-  const { student, invoices, attendances } = bundle;
+  const { student, invoices, attendances, subscriptions } = bundle;
+  const plans = serializePlansForClient(plansRaw);
+  const subscriptionsClient = serializeSubscriptionsForClient(subscriptions);
   const monthly = countSessionsByUtcMonth(dash.sessions);
   const paidTotal = sumPaymentsForInvoices(invoices);
 
@@ -111,12 +119,6 @@ export default async function StudentProfilePage({ params }: PageProps) {
                     {student.parentPhone ?? "—"}
                   </span>
                 </p>
-                <p>
-                  بريد الحساب:{" "}
-                  <span className="text-foreground" dir="ltr">
-                    {student.profile?.user?.email ?? "—"}
-                  </span>
-                </p>
                 <p>العمر: {student.age ?? "—"}</p>
               </CardContent>
             </Card>
@@ -169,20 +171,15 @@ export default async function StudentProfilePage({ params }: PageProps) {
             </Card>
             <Card className="lg:col-span-3">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">حساب تسجيل الدخول</CardTitle>
-                <CardDescription>إدارة البريد وكلمة المرور وتعطيل الدخول — للمشرف فقط.</CardDescription>
+                <CardTitle className="text-base">الاشتراكات</CardTitle>
+                <CardDescription>تعديل أو حذف اشتراك الطالب — الباقات المعتمدة فقط.</CardDescription>
               </CardHeader>
               <CardContent>
-                {student.profile?.user ? (
-                  <StudentAccountPanel
-                    studentId={student.id}
-                    loginEmail={student.profile.user.email}
-                    disabled={student.profile.user.disabled}
-                    hasPassword={student.profile.user.hasPassword}
-                  />
-                ) : (
-                  <p className="text-sm font-bold text-muted">لا يوجد مستخدم مربوط بهذا الطالب.</p>
-                )}
+                <StudentSubscriptionsPanel
+                  studentId={student.id}
+                  subscriptions={subscriptionsClient}
+                  plans={plans}
+                />
               </CardContent>
             </Card>
           </div>

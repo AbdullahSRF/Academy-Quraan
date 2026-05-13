@@ -35,6 +35,6 @@ export async function adminSendInboxMessageAction(_prev: AdminMessageActionState
       body: parsed.data.body,
     },
   });
-  revalidatePath("/admin/user-accounts");
+  revalidatePath("/admin/students");
   return { ok: true, error: null };
 }

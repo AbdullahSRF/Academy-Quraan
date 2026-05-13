@@ -48,7 +48,6 @@ export default async function EditStudentPage({ params }: PageProps) {
               age: student.age,
               phone: student.phone,
               parentPhone: student.parentPhone,
-              address: student.address,
               level: student.level,
               status: student.status,
             }}

@@ -1,29 +1,6 @@
 import { Role } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import prisma from "@/infrastructure/db/prisma";
-import type { StudentCreateWithCredentialsInput } from "@/features/students/schemas/student.schema";
-
-export async function listStudentsForAdmin() {
-  return prisma.student.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      schedules: true,
-      profile: {
-        include: {
-          user: { select: { id: true, email: true, disabled: true } },
-        },
-      },
-    },
-  });
-}
-
-/** يربط حساب المستخدم (طالب) بسجل الطالب في الأكاديمية. */
-export async function getStudentForUserId(userId: string) {
-  return prisma.profile.findUnique({
-    where: { userId },
-    select: { student: { select: { id: true, fullName: true } } },
-  });
-}
+import type { StudentUpsertInput } from "@/features/students/schemas/student.schema";
 
 export async function getStudentForAdmin(id: string) {
   return prisma.student.findUnique({
@@ -39,19 +16,13 @@ export async function getStudentForAdmin(id: string) {
   });
 }
 
-export async function createStudentRecord(input: StudentCreateWithCredentialsInput) {
-  const emailNorm = input.loginEmail.trim().toLowerCase();
-  const dup = await prisma.user.findUnique({ where: { email: emailNorm } });
-  if (dup) throw new Error("EMAIL_IN_USE");
-
-  const passwordHash = await bcrypt.hash(input.tempPassword, 12);
-
+export async function createStudentRecord(input: StudentUpsertInput) {
   const created = await prisma.user.create({
     data: {
-      email: emailNorm,
+      email: null,
       name: input.fullName,
       role: Role.STUDENT,
-      passwordHash,
+      passwordHash: null,
       disabled: false,
       profile: {
         create: {
@@ -61,7 +32,6 @@ export async function createStudentRecord(input: StudentCreateWithCredentialsInp
               age: input.age ?? null,
               phone: input.phone ?? null,
               parentPhone: input.parentPhone ?? null,
-              address: input.address ?? null,
               level: input.level ?? null,
               status: input.status,
             },
@@ -92,7 +62,6 @@ export async function updateStudentRecord(
     age?: number;
     phone?: string | null;
     parentPhone?: string | null;
-    address?: string | null;
     level?: string | null;
     status: "REGULAR" | "PAUSED" | "FROZEN" | "WITHDRAWN" | "ARCHIVED";
   },
@@ -117,7 +86,6 @@ export async function updateStudentRecord(
         age: input.age ?? null,
         phone: input.phone ?? null,
         parentPhone: input.parentPhone ?? null,
-        address: input.address ?? null,
         level: input.level ?? null,
         status: input.status,
       },

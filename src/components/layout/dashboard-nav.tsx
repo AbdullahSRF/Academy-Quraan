@@ -11,16 +11,12 @@ import {
   Repeat,
   FileSpreadsheet,
   CalendarCheck,
-  UserCog,
-  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const adminLinks = [
   { href: "/admin", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/admin/students", label: "الطلاب", icon: Users },
-  { href: "/admin/user-accounts", label: "حسابات الدخول", icon: KeyRound },
-  { href: "/admin/accounts", label: "الحسابات", icon: UserCog },
   { href: "/admin/attendance", label: "الحضور والغياب", icon: ClipboardList },
   { href: "/admin/memorization", label: "الحفظ والتسميع", icon: BookOpenCheck },
   { href: "/admin/memorization/session", label: "حصة تسميع", icon: CalendarCheck },

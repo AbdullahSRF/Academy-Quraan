@@ -22,7 +22,7 @@ export async function getStudentProfileBundle(studentId: string) {
   });
   if (!student) return null;
 
-  const [invoices, attendances] = await Promise.all([
+  const [invoices, attendances, subscriptions] = await Promise.all([
     prisma.invoice.findMany({
       where: { studentId },
       orderBy: { issuedAt: "desc" },
@@ -33,6 +33,14 @@ export async function getStudentProfileBundle(studentId: string) {
       where: { studentId },
       orderBy: { date: "desc" },
       take: 40,
+    }),
+    prisma.studentSubscription.findMany({
+      where: { studentId },
+      orderBy: { startedAt: "desc" },
+      include: {
+        plan: true,
+        student: { select: { id: true, fullName: true, status: true } },
+      },
     }),
   ]);
 
@@ -56,7 +64,7 @@ export async function getStudentProfileBundle(studentId: string) {
       : null,
   };
 
-  return { student: studentOut, invoices, attendances };
+  return { student: studentOut, invoices, attendances, subscriptions };
 }
 
 export function sumPaymentsForInvoices(invoices: { payments: { amount: Prisma.Decimal }[] }[]): Prisma.Decimal {

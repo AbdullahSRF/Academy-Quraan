@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth-guard";
-import { studentCreateWithCredentialsSchema, studentUpsertSchema } from "@/features/students/schemas/student.schema";
+import { studentUpsertSchema } from "@/features/students/schemas/student.schema";
 import {
   archiveStudentRecord,
   createStudentRecord,
@@ -13,8 +13,6 @@ import {
 export type StudentActionState = {
   ok: boolean;
   error: string | null;
-  /** بعد إنشاء طالب: البريد الذي يمكن إبلاغ الطالب به (كلمة المرور هي التي أدخلتها في الاستمارة). */
-  createdLoginEmail?: string | null;
 };
 
 function emptyToUndef(v: FormDataEntryValue | null): string | undefined {
@@ -29,7 +27,6 @@ function parseStudentCoreFromForm(formData: FormData) {
     age: formData.get("age"),
     phone: emptyToUndef(formData.get("phone")),
     parentPhone: emptyToUndef(formData.get("parentPhone")),
-    address: emptyToUndef(formData.get("address")),
     level: emptyToUndef(formData.get("level")),
     status: String(formData.get("status") ?? "REGULAR"),
   };
@@ -37,23 +34,15 @@ function parseStudentCoreFromForm(formData: FormData) {
 
 export async function createStudentAction(_prev: StudentActionState, formData: FormData): Promise<StudentActionState> {
   if (!(await requireAdminSession())) return { ok: false, error: "غير مصرّح." };
-  const parsed = studentCreateWithCredentialsSchema.safeParse({
-    ...parseStudentCoreFromForm(formData),
-    loginEmail: String(formData.get("loginEmail") ?? "").trim(),
-    tempPassword: String(formData.get("tempPassword") ?? ""),
-  });
+  const parsed = studentUpsertSchema.safeParse(parseStudentCoreFromForm(formData));
   if (!parsed.success) {
-    return { ok: false, error: "تحقق من الحقول: الاسم، البريد، وكلمة مرور مؤقتة (8 أحرف على الأقل)." };
+    return { ok: false, error: "تحقق من الحقول: الاسم والحالة صالحة." };
   }
   try {
     await createStudentRecord(parsed.data);
     revalidatePath("/admin/students");
-    revalidatePath("/admin/accounts");
-    return { ok: true, error: null, createdLoginEmail: parsed.data.loginEmail };
-  } catch (e) {
-    if (e instanceof Error && e.message === "EMAIL_IN_USE") {
-      return { ok: false, error: "البريد الإلكتروني مستخدم لحساب آخر." };
-    }
+    return { ok: true, error: null };
+  } catch {
     return { ok: false, error: "تعذر حفظ الطالب. تحقق من الاتصال بقاعدة البيانات." };
   }
 }
@@ -90,7 +79,6 @@ export async function deleteStudentAction(_prev: StudentActionState, formData: F
   try {
     await deleteStudentCascade(id);
     revalidatePath("/admin/students");
-    revalidatePath("/admin/accounts");
     return { ok: true, error: null };
   } catch (e) {
     if (e instanceof Error && e.message === "STUDENT_NOT_FOUND") {

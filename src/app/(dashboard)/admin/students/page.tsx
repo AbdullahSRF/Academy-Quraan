@@ -56,7 +56,7 @@ export default async function AdminStudentsPage({ searchParams }: PageProps) {
         <CardHeader>
           <CardTitle>إضافة طالب</CardTitle>
           <CardDescription>
-            يُنشأ حساب مستخدم للطالب ببريد وكلمة مرور مؤقتة؛ يمكن تعديلهما أو تعطيل الحساب لاحقًا من صفحة الطالب أو من «الحسابات» لأولياء الأمور.
+            إضافة سجل طالب للأكاديمية (بيانات الملف فقط). الدخول للوحة الإدارة للمشرفين فقط من صفحة تسجيل الدخول.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,7 +81,7 @@ export default async function AdminStudentsPage({ searchParams }: PageProps) {
                 id="q"
                 name="q"
                 defaultValue={q}
-                placeholder="اسم، هاتف، بريد…"
+                placeholder="اسم، هاتف، مستوى…"
                 className="h-10 min-w-[12rem] rounded-xl border-2 border-border bg-card px-3 text-sm font-bold"
               />
             </div>

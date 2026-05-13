@@ -58,7 +58,7 @@ export function StudentsDirectory({ rows }: { rows: StudentDirectoryRow[] }) {
     return rows.filter((r) => {
       if (statusFilter !== "ALL" && r.status !== statusFilter) return false;
       if (!needle) return true;
-      const hay = `${r.fullName} ${r.level ?? ""} ${r.accountEmail ?? ""} ${r.phone ?? ""} ${r.parentPhone ?? ""}`.toLowerCase();
+      const hay = `${r.fullName} ${r.level ?? ""} ${r.phone ?? ""} ${r.parentPhone ?? ""}`.toLowerCase();
       return hay.includes(needle);
     });
   }, [rows, q, statusFilter]);

@@ -10,17 +10,8 @@ export const studentUpsertSchema = z.object({
   ),
   phone: z.string().max(32).optional().nullable(),
   parentPhone: z.string().max(32).optional().nullable(),
-  address: z.string().max(500).optional().nullable(),
   level: z.string().max(80).optional().nullable(),
   status: studentStatusSchema.default("REGULAR"),
 });
 
 export type StudentUpsertInput = z.infer<typeof studentUpsertSchema>;
-
-/** إنشاء طالب مع بريد وكلمة مرور لتسجيل الدخول (يحددها المشرف). */
-export const studentCreateWithCredentialsSchema = studentUpsertSchema.extend({
-  loginEmail: z.string().trim().toLowerCase().pipe(z.string().email()),
-  tempPassword: z.string().min(8).max(128),
-});
-
-export type StudentCreateWithCredentialsInput = z.infer<typeof studentCreateWithCredentialsSchema>;

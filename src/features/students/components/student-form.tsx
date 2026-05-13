@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createStudentAction, updateStudentAction, type StudentActionState } from "@/features/students/actions";
-import { nativeSelectClassName, nativeTextareaClassName } from "@/lib/native-form-classes";
+import { nativeSelectClassName } from "@/lib/native-form-classes";
 
 const initial: StudentActionState = { ok: false, error: null };
 
@@ -30,7 +30,6 @@ type DefaultValues = {
   age: number | null;
   phone: string | null;
   parentPhone: string | null;
-  address: string | null;
   level: string | null;
   status: StudentStatus;
 };
@@ -50,7 +49,6 @@ export function StudentForm({ mode, studentId, defaultValues }: Props) {
     age: null,
     phone: null,
     parentPhone: null,
-    address: null,
     level: null,
     status: "REGULAR",
   };
@@ -68,19 +66,7 @@ export function StudentForm({ mode, studentId, defaultValues }: Props) {
       ) : null}
       {state.ok ? (
         <p className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-800">
-          {mode === "create" ? (
-            <>
-              تمت إضافة الطالب بنجاح.
-              {state.createdLoginEmail ? (
-                <>
-                  {" "}
-                  بريد تسجيل الدخول: <span dir="ltr">{state.createdLoginEmail}</span> — أبلغ الطالب بكلمة المرور المؤقتة التي أدخلتها (لا تُعرض لاحقًا من النظام).
-                </>
-              ) : null}
-            </>
-          ) : (
-            "تم حفظ التعديلات."
-          )}
+          {mode === "create" ? "تمت إضافة الطالب بنجاح." : "تم حفظ التعديلات."}
         </p>
       ) : null}
 
@@ -124,41 +110,9 @@ export function StudentForm({ mode, studentId, defaultValues }: Props) {
           />
         </div>
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="address">العنوان</Label>
-          <textarea
-            id="address"
-            name="address"
-            rows={2}
-            maxLength={500}
-            defaultValue={dv.address ?? ""}
-            className={nativeTextareaClassName}
-          />
-        </div>
-        <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="level">المستوى</Label>
           <Input id="level" name="level" defaultValue={dv.level ?? ""} maxLength={80} />
         </div>
-        {mode === "create" ? (
-          <>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="loginEmail">بريد تسجيل الدخول للطالب</Label>
-              <Input
-                id="loginEmail"
-                name="loginEmail"
-                type="email"
-                required
-                dir="ltr"
-                className="text-left"
-                autoComplete="off"
-                placeholder="example@domain.com"
-              />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="tempPassword">كلمة مرور مؤقتة</Label>
-              <Input id="tempPassword" name="tempPassword" type="password" required minLength={8} autoComplete="new-password" />
-            </div>
-          </>
-        ) : null}
       </div>
 
       <Button type="submit" className="w-full sm:w-auto">

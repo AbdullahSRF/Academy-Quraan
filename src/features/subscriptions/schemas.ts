@@ -12,3 +12,18 @@ export const updateSubscriptionStatusSchema = z.object({
   id: z.string().min(1),
   status: z.enum(["ACTIVE", "PAUSED", "CANCELLED", "EXPIRED"]),
 });
+
+export const updateStudentSubscriptionDetailsSchema = z.object({
+  id: z.string().min(1),
+  studentId: z.string().min(1),
+  planId: z.string().min(1),
+  status: z.enum(["ACTIVE", "PAUSED", "CANCELLED", "EXPIRED"]),
+  startedAt: z.string().trim().min(1),
+  endsAt: z.string().optional().or(z.literal("")),
+  notes: z.string().trim().max(500).optional().or(z.literal("")),
+});
+
+export const deleteStudentSubscriptionSchema = z.object({
+  id: z.string().min(1),
+  studentId: z.string().min(1),
+});

@@ -18,6 +18,7 @@ export type StudentSubscriptionClient = {
   status: string;
   startedAt: string;
   endsAt: string | null;
+  notes: string | null;
   student: { id: string; fullName: string; status: string };
   plan: {
     id: string;
@@ -44,6 +45,7 @@ type SubRowDb = {
   status: string;
   startedAt: Date;
   endsAt: Date | null;
+  notes: string | null;
   student: { id: string; fullName: string; status: string };
   plan: { id: string; name: string; code: string | null; priceMonthly: { toString(): string }; currency: string };
 };
@@ -72,6 +74,7 @@ export function serializeSubscriptionsForClient(subs: SubRowDb[]): StudentSubscr
       status: s.status,
       startedAt: s.startedAt.toISOString(),
       endsAt: s.endsAt ? s.endsAt.toISOString() : null,
+      notes: s.notes ?? null,
       student: s.student,
       plan: {
         id: s.plan.id,
