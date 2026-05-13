@@ -4,17 +4,26 @@ import { getAuthSecret } from "@/lib/auth-env";
 
 export type AppRole = "ADMIN" | "STUDENT" | "PARENT";
 
+/** حقول التصفّح كمستخدم آخر — تُعرّف منفصلة لأن دمج NextAuth مع `DefaultSession["user"]` يضيّق النوع إلى `string` ويمنع `null`. */
+type SessionUserImpersonation = {
+  impersonatorId: string | null;
+  impersonatorName: string | null;
+};
+
 const DAY = 24 * 60 * 60;
 
 declare module "next-auth" {
   interface Session {
-    user: {
+    user: Omit<
+      NonNullable<DefaultSession["user"]>,
+      "impersonatorId" | "impersonatorName"
+    > & {
       id: string;
       role: AppRole;
       /** معرّف المشرف الأصلي عند التصفح كطالب/ولي أمر */
       impersonatorId: string | null;
       impersonatorName: string | null;
-    } & DefaultSession["user"];
+    };
   }
 
   interface User {
@@ -100,8 +109,11 @@ export default {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as AppRole;
-        session.user.impersonatorId = typeof token.impersonatorId === "string" ? token.impersonatorId : null;
-        session.user.impersonatorName = typeof token.impersonatorName === "string" ? token.impersonatorName : null;
+        const impersonation = session.user as unknown as SessionUserImpersonation;
+        impersonation.impersonatorId =
+          typeof token.impersonatorId === "string" ? token.impersonatorId : null;
+        impersonation.impersonatorName =
+          typeof token.impersonatorName === "string" ? token.impersonatorName : null;
       }
       return session;
     },

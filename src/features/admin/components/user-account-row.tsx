@@ -58,6 +58,7 @@ export function UserAccountRow({ row }: { row: UserAccountRowSerialized }) {
   const [emailState, emailAction] = useActionState(adminSetUserEmailAction, accInitial);
   const [delState, delAction] = useActionState(adminDeleteUserAccountAction, accInitial);
   const [msgState, msgAction] = useActionState(adminSendInboxMessageAction, msgInitial);
+  const [, toggleDisabledAction] = useActionState(adminToggleUserDisabledAction, accInitial);
 
   async function onImpersonate() {
     setImpBusy(true);
@@ -211,7 +212,7 @@ export function UserAccountRow({ row }: { row: UserAccountRowSerialized }) {
             </DialogContent>
           </Dialog>
 
-          <form action={adminToggleUserDisabledAction}>
+          <form action={toggleDisabledAction}>
             <input type="hidden" name="userId" value={row.userId} />
             <input type="hidden" name="disabled" value={row.disabled ? "0" : "1"} />
             <Button type="submit" size="sm" variant="outline" className="font-bold">
