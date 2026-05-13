@@ -29,6 +29,7 @@ function parseStudentCoreFromForm(formData: FormData) {
     parentPhone: emptyToUndef(formData.get("parentPhone")),
     level: emptyToUndef(formData.get("level")),
     status: String(formData.get("status") ?? "REGULAR"),
+    subscriptionPlanId: emptyToUndef(formData.get("subscriptionPlanId")),
   };
 }
 
@@ -41,6 +42,8 @@ export async function createStudentAction(_prev: StudentActionState, formData: F
   try {
     await createStudentRecord(parsed.data);
     revalidatePath("/admin/students");
+    revalidatePath("/admin/subscriptions");
+    revalidatePath("/admin/finance");
     return { ok: true, error: null };
   } catch {
     return { ok: false, error: "تعذر حفظ الطالب. تحقق من الاتصال بقاعدة البيانات." };
@@ -61,6 +64,9 @@ export async function updateStudentAction(_prev: StudentActionState, formData: F
     await updateStudentRecord(id, parsed.data);
     revalidatePath("/admin/students");
     revalidatePath(`/admin/students/${id}/edit`);
+    revalidatePath(`/admin/students/${id}`);
+    revalidatePath("/admin/subscriptions");
+    revalidatePath("/admin/finance");
     return { ok: true, error: null };
   } catch (e) {
     if (e instanceof Error && e.message === "STUDENT_NOT_FOUND") {

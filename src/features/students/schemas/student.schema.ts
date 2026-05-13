@@ -12,6 +12,10 @@ export const studentUpsertSchema = z.object({
   parentPhone: z.string().max(32).optional().nullable(),
   level: z.string().max(80).optional().nullable(),
   status: studentStatusSchema.default("REGULAR"),
+  subscriptionPlanId: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : String(v).trim()),
+    z.string().min(1).optional(),
+  ),
 });
 
 export type StudentUpsertInput = z.infer<typeof studentUpsertSchema>;

@@ -22,7 +22,12 @@ function revalidateSubscriptionPaths(studentId?: string) {
   revalidatePath("/admin/subscriptions");
   revalidatePath("/admin/finance");
   revalidatePath("/admin/reports");
-  if (studentId) revalidatePath(`/admin/students/${studentId}`);
+  revalidatePath("/admin/memorization");
+  revalidatePath("/admin/memorization/session");
+  if (studentId) {
+    revalidatePath(`/admin/students/${studentId}`);
+    revalidatePath(`/admin/students/${studentId}/memorization`);
+  }
 }
 
 export async function assignStudentSubscriptionFormAction(formData: FormData) {

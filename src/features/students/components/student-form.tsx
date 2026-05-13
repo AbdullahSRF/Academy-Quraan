@@ -38,9 +38,18 @@ type Props = {
   mode: "create" | "edit";
   studentId?: string;
   defaultValues?: DefaultValues;
+  subscriptionPlans?: { id: string; name: string }[];
+  /** اشتراك ACTIVE الحالي (تعديل) */
+  defaultSubscriptionPlanId?: string | null;
 };
 
-export function StudentForm({ mode, studentId, defaultValues }: Props) {
+export function StudentForm({
+  mode,
+  studentId,
+  defaultValues,
+  subscriptionPlans,
+  defaultSubscriptionPlanId,
+}: Props) {
   const action = mode === "create" ? createStudentAction : updateStudentAction;
   const [state, formAction] = useActionState(action, initial);
 
@@ -113,6 +122,27 @@ export function StudentForm({ mode, studentId, defaultValues }: Props) {
           <Label htmlFor="level">المستوى</Label>
           <Input id="level" name="level" defaultValue={dv.level ?? ""} maxLength={80} />
         </div>
+        {subscriptionPlans && subscriptionPlans.length > 0 ? (
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="subscriptionPlanId">باقة الاشتراك</Label>
+            <select
+              id="subscriptionPlanId"
+              name="subscriptionPlanId"
+              className={nativeSelectClassName}
+              defaultValue={defaultSubscriptionPlanId ?? ""}
+            >
+              <option value="">{mode === "create" ? "— لاحقًا أو من صفحة الاشتراكات —" : "— بدون تغيير —"}</option>
+              {subscriptionPlans.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs font-bold text-muted">
+              تُحفظ كاشتراك نشط ويظهر في «الاشتراكات» و«المالية» عند اختيار باقة.
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <Button type="submit" className="w-full sm:w-auto">

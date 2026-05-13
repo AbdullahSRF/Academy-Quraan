@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { ZoneRow } from "@/features/memorization-v2/domain/promotion";
 import { progressLevelFromPercent } from "@/features/memorization-v2/domain/coverage";
 import { formatAyahRangeLine } from "@/lib/quran/ayah-ref";
+import { MemorizationSessionDeleteForm } from "@/features/memorization-v2/components/memorization-session-delete-form";
 
 const ratingAr: Record<string, string> = {
   EXCELLENT: "ممتاز",
@@ -59,6 +60,10 @@ type Props = {
   showSessionWorkColumns?: boolean;
   /** أعمدة الجديد / الواجب / الملاحظات (ملف الطالب) */
   showExtendedSessionColumns?: boolean;
+  /** عمود حذف حصة (ملف الطالب فقط) */
+  allowDeleteSessions?: boolean;
+  /** مطلوب عند allowDeleteSessions */
+  studentIdForActions?: string;
 };
 
 export function MemorizationDashboardBody({
@@ -70,8 +75,19 @@ export function MemorizationDashboardBody({
   absenceDays,
   showSessionWorkColumns = false,
   showExtendedSessionColumns = false,
+  allowDeleteSessions = false,
+  studentIdForActions,
 }: Props) {
   const lastSession = sessions[0] ?? null;
+
+  const sessionsTableMin =
+    showExtendedSessionColumns && allowDeleteSessions
+      ? "min-w-[1220px]"
+      : showExtendedSessionColumns
+        ? "min-w-[1100px]"
+        : allowDeleteSessions
+          ? "min-w-[800px]"
+          : "min-w-[720px]";
 
   return (
     <>
@@ -191,9 +207,7 @@ export function MemorizationDashboardBody({
           {sessions.length === 0 ? (
             <p className="px-6 py-6 text-center text-base font-bold text-muted">لا توجد جلسات.</p>
           ) : (
-            <table
-              className={`w-full border-collapse text-start text-sm font-bold ${showExtendedSessionColumns ? "min-w-[1100px]" : "min-w-[720px]"}`}
-            >
+            <table className={`w-full border-collapse text-sm font-bold ${sessionsTableMin}`}>
               <thead>
                 <tr className="border-b border-border bg-muted-bg/80 text-foreground">
                   <th className="px-4 py-3">التاريخ</th>
@@ -213,6 +227,7 @@ export function MemorizationDashboardBody({
                       <th className="px-4 py-3">مراجعة بعيد</th>
                     </>
                   ) : null}
+                  {allowDeleteSessions && studentIdForActions ? <th className="px-4 py-3">حذف</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -246,6 +261,15 @@ export function MemorizationDashboardBody({
                           {workSnapLine(s.farWorkSnapshot)}
                         </td>
                       </>
+                    ) : null}
+                    {allowDeleteSessions && studentIdForActions ? (
+                      <td className="px-4 py-3">
+                        <MemorizationSessionDeleteForm
+                          sessionId={s.id}
+                          studentId={studentIdForActions}
+                          disabled={!!s.paymentId}
+                        />
+                      </td>
                     ) : null}
                   </tr>
                 ))}

@@ -3,7 +3,9 @@
 import type { AttendanceStatus, SessionPaymentStatus, SessionRating } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import prisma from "@/infrastructure/db/prisma";
 import { runCompleteMemorizationSession } from "./application/complete-session";
+import { recomputeStudentMemorizationStats } from "./data/student-dashboard";
 
 export type CompleteSessionState = { ok: boolean; error: string | null };
 
@@ -37,6 +39,17 @@ function parseOptionalReviewWork(fd: FormData, prefix: string, label: string): W
   const ea = p(d, `${label} إلى آية`);
   if (typeof ea === "object" && "error" in ea) return ea;
   return { startSurah: ns, startAyah: na, endSurah: es, endAyah: ea };
+}
+
+function revalidateTasmeePaths(studentId: string) {
+  revalidatePath("/admin/memorization");
+  revalidatePath("/admin/memorization/session");
+  revalidatePath("/admin/students");
+  revalidatePath(`/admin/students/${studentId}`);
+  revalidatePath(`/admin/students/${studentId}/memorization`);
+  revalidatePath("/admin/finance");
+  revalidatePath("/admin/reports");
+  revalidatePath("/admin/attendance");
 }
 
 export async function completeMemorizationSessionAction(
@@ -148,13 +161,75 @@ export async function completeMemorizationSessionAction(
       paymentAmount: paymentStatusStr === "PAID" ? paymentAmount : null,
       paymentMethod: paymentStatusStr === "PAID" ? paymentMethodStr || null : null,
     });
-    revalidatePath("/admin/memorization");
-    revalidatePath("/admin/memorization/session");
-    revalidatePath("/admin/students");
-    revalidatePath(`/admin/students/${studentId}/memorization`);
+    revalidateTasmeePaths(studentId);
     return { ok: true, error: null };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "تعذر حفظ الحصة.";
     return { ok: false, error: msg };
+  }
+}
+
+/** حذف حصة تسميع مكتملة (بدون دفعة مرتبطة). حدود المناطق لا تُعاد تلقائيًا؛ يُحدَّث عداد الإحصائيات فقط. */
+export async function deleteMemorizationSessionAction(formData: FormData) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return { ok: false as const, error: "غير مصرّح." };
+  }
+
+  const sessionId = String(formData.get("sessionId") ?? "").trim();
+  const studentId = String(formData.get("studentId") ?? "").trim();
+  if (!sessionId || !studentId) {
+    return { ok: false as const, error: "بيانات ناقصة." };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const row = await tx.memorizationSession.findFirst({
+        where: { id: sessionId, studentId },
+        select: {
+          id: true,
+          sessionDate: true,
+          attendanceId: true,
+          paymentId: true,
+        },
+      });
+      if (!row) {
+        throw new Error("SESSION_NOT_FOUND");
+      }
+      if (row.paymentId) {
+        throw new Error("HAS_PAYMENT");
+      }
+
+      await tx.memorizationSession.delete({ where: { id: row.id } });
+
+      const day = row.sessionDate;
+      await tx.memorizationRecord.deleteMany({
+        where: { studentId, sessionDate: day },
+      });
+
+      if (row.attendanceId) {
+        const stillUsed = await tx.memorizationSession.count({
+          where: { attendanceId: row.attendanceId },
+        });
+        if (stillUsed === 0) {
+          await tx.attendance.delete({ where: { id: row.attendanceId } }).catch(() => {});
+        }
+      }
+
+      await recomputeStudentMemorizationStats(studentId, tx);
+    });
+
+    revalidateTasmeePaths(studentId);
+    return { ok: true as const, error: null as string | null };
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.message === "HAS_PAYMENT") {
+        return { ok: false as const, error: "لا يمكن حذف حصة مرتبطة بدفعة. عالج الدفعة أولًا." };
+      }
+      if (e.message === "SESSION_NOT_FOUND") {
+        return { ok: false as const, error: "الحصة غير موجودة." };
+      }
+    }
+    return { ok: false as const, error: "تعذر حذف الحصة." };
   }
 }

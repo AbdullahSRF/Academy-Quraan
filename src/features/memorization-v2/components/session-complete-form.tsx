@@ -29,15 +29,22 @@ export function SessionCompleteForm({
   students,
   defaultDate,
   initialStudentId,
+  lockedStudentId,
   draft,
 }: {
   students: StudentOpt[];
   defaultDate: string;
   initialStudentId?: string;
+  /** عند التعيين: يُثبَّت الطالب ويُخفى الاختيار (مثلاً من ملف الطالب). */
+  lockedStudentId?: string;
   draft?: MemorizationSessionDraft | null;
 }) {
   const studentDefault =
-    initialStudentId && students.some((s) => s.id === initialStudentId) ? initialStudentId : "";
+    lockedStudentId && students.some((s) => s.id === lockedStudentId)
+      ? lockedStudentId
+      : initialStudentId && students.some((s) => s.id === initialStudentId)
+        ? initialStudentId
+        : "";
   const [state, formAction] = useActionState(completeMemorizationSessionAction, initial);
 
   return (
@@ -58,21 +65,30 @@ export function SessionCompleteForm({
           <h3 className="mb-3 text-sm font-bold text-accent-foreground">أساسيات الحصة</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="studentId">الطالب</Label>
-              <select
-                id="studentId"
-                name="studentId"
-                required
-                className={nativeSelectClassName}
-                defaultValue={studentDefault}
-              >
-                <option value="">— اختر —</option>
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.fullName}
-                  </option>
-                ))}
-              </select>
+              {lockedStudentId ? <Label>الطالب</Label> : <Label htmlFor="studentId">الطالب</Label>}
+              {lockedStudentId ? (
+                <>
+                  <input type="hidden" name="studentId" value={lockedStudentId} />
+                  <p className="rounded-xl border border-border bg-muted-bg/50 px-3 py-2 text-sm font-bold text-foreground">
+                    {students.find((s) => s.id === lockedStudentId)?.fullName ?? "—"}
+                  </p>
+                </>
+              ) : (
+                <select
+                  id="studentId"
+                  name="studentId"
+                  required
+                  className={nativeSelectClassName}
+                  defaultValue={studentDefault}
+                >
+                  <option value="">— اختر —</option>
+                  {students.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.fullName}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="sessionDate">تاريخ الحصة</Label>
@@ -259,7 +275,7 @@ export function SessionCompleteForm({
             formId="complete-session-form"
             field="homework"
             defaultDate={defaultDate}
-            initialStudentId={initialStudentId}
+            initialStudentId={lockedStudentId ?? initialStudentId}
             defaultValue={draft?.homeworkNext ?? ""}
             maxLength={2000}
             placeholder="اختياري"
@@ -273,7 +289,7 @@ export function SessionCompleteForm({
             formId="complete-session-form"
             field="notes"
             defaultDate={defaultDate}
-            initialStudentId={initialStudentId}
+            initialStudentId={lockedStudentId ?? initialStudentId}
             defaultValue={draft?.notes ?? ""}
             maxLength={2000}
             placeholder="اختياري"

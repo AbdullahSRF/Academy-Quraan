@@ -4,15 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { getStudentForAdmin } from "@/features/students/data";
 import { StudentForm } from "@/features/students/components/student-form";
+import prisma from "@/infrastructure/db/prisma";
+import { listFixedSubscriptionPlansWithCounts } from "@/features/subscriptions/data";
 
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function EditStudentPage({ params }: PageProps) {
   const { id } = await params;
-  const student = await getStudentForAdmin(id);
+  const [student, plansRaw, activeSub] = await Promise.all([
+    getStudentForAdmin(id),
+    listFixedSubscriptionPlansWithCounts(),
+    prisma.studentSubscription.findFirst({
+      where: { studentId: id, status: "ACTIVE" },
+      select: { planId: true },
+    }),
+  ]);
   if (!student) {
     notFound();
   }
+
+  const subscriptionPlans = plansRaw.map((p) => ({ id: p.id, name: p.name }));
 
   return (
     <div className="space-y-6">
@@ -43,6 +54,8 @@ export default async function EditStudentPage({ params }: PageProps) {
           <StudentForm
             mode="edit"
             studentId={student.id}
+            subscriptionPlans={subscriptionPlans}
+            defaultSubscriptionPlanId={activeSub?.planId ?? null}
             defaultValues={{
               fullName: student.fullName,
               age: student.age,

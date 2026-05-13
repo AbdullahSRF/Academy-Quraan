@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import prisma from "@/infrastructure/db/prisma";
 import type { StudentUpsertInput } from "@/features/students/schemas/student.schema";
+import { syncStudentActiveSubscriptionPlan } from "@/features/students/student-subscription-sync";
 
 export async function getStudentForAdmin(id: string) {
   return prisma.student.findUnique({
@@ -50,22 +51,13 @@ export async function createStudentRecord(input: StudentUpsertInput) {
   if (studentId) {
     const { ensureStudentMemorizationBootstrap } = await import("@/features/memorization-v2/data/zones");
     await ensureStudentMemorizationBootstrap(studentId);
+    await syncStudentActiveSubscriptionPlan(studentId, input.subscriptionPlanId);
   }
 
   return created;
 }
 
-export async function updateStudentRecord(
-  studentId: string,
-  input: {
-    fullName: string;
-    age?: number;
-    phone?: string | null;
-    parentPhone?: string | null;
-    level?: string | null;
-    status: "REGULAR" | "PAUSED" | "FROZEN" | "WITHDRAWN" | "ARCHIVED";
-  },
-) {
+export async function updateStudentRecord(studentId: string, input: StudentUpsertInput) {
   const student = await prisma.student.findUnique({
     where: { id: studentId },
     include: { profile: { include: { user: true } } },
@@ -91,6 +83,8 @@ export async function updateStudentRecord(
       },
     }),
   ]);
+
+  await syncStudentActiveSubscriptionPlan(studentId, input.subscriptionPlanId);
 }
 
 export async function archiveStudentRecord(studentId: string) {

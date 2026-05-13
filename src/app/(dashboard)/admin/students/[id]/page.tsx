@@ -14,6 +14,7 @@ import { listFixedSubscriptionPlansWithCounts } from "@/features/subscriptions/d
 import { serializePlansForClient, serializeSubscriptionsForClient } from "@/features/subscriptions/serialize-for-client";
 import { StudentSubscriptionsPanel } from "@/features/subscriptions/components/student-subscriptions-panel";
 import { PriceAmount } from "@/components/ui/price-amount";
+import { StudentInlineTasmeeBlock } from "@/features/memorization-v2/components/student-inline-tasmee-block";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -88,6 +89,9 @@ export default async function StudentProfilePage({ params }: PageProps) {
         <TabsList className="flex h-auto w-full flex-wrap gap-1 p-2">
           <TabsTrigger value="overview" className="flex-1 min-w-[7rem]">
             نظرة عامة
+          </TabsTrigger>
+          <TabsTrigger value="tasmee" className="flex-1 min-w-[7rem]">
+            تسميع اليوم
           </TabsTrigger>
           <TabsTrigger value="memorization" className="flex-1 min-w-[7rem]">
             الحفظ والحصص
@@ -185,6 +189,10 @@ export default async function StudentProfilePage({ params }: PageProps) {
           </div>
         </TabsContent>
 
+        <TabsContent value="tasmee" className="space-y-4">
+          <StudentInlineTasmeeBlock studentId={student.id} studentName={student.fullName} />
+        </TabsContent>
+
         <TabsContent value="memorization">
           <MemorizationDashboardBody
             zones={dash.zones}
@@ -195,6 +203,8 @@ export default async function StudentProfilePage({ params }: PageProps) {
             absenceDays={dash.absenceDays}
             showSessionWorkColumns
             showExtendedSessionColumns
+            allowDeleteSessions
+            studentIdForActions={student.id}
           />
         </TabsContent>
 

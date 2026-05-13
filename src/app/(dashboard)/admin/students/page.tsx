@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { listStudentsForAdminTable } from "@/features/students/admin-students-table-data";
 import { StudentForm } from "@/features/students/components/student-form";
 import { StudentsDirectory } from "@/features/students/components/students-directory";
+import { listFixedSubscriptionPlansWithCounts } from "@/features/subscriptions/data";
 
 const STATUS_OPTS = ["ALL", "REGULAR", "PAUSED", "FROZEN", "WITHDRAWN", "ARCHIVED"] as const;
 
@@ -21,13 +22,18 @@ export default async function AdminStudentsPage({ searchParams }: PageProps) {
   const status = (STATUS_OPTS as readonly string[]).includes(stRaw) ? stRaw : "ALL";
   const includeArchived = sp.archived === "1";
 
-  const { rows: raw, total } = await listStudentsForAdminTable({
-    search: q.trim() || undefined,
-    status: status === "ALL" ? "ALL" : (status as StudentStatus),
-    page,
-    pageSize: 25,
-    includeArchived,
-  });
+  const [{ rows: raw, total }, plansRaw] = await Promise.all([
+    listStudentsForAdminTable({
+      search: q.trim() || undefined,
+      status: status === "ALL" ? "ALL" : (status as StudentStatus),
+      page,
+      pageSize: 25,
+      includeArchived,
+    }),
+    listFixedSubscriptionPlansWithCounts(),
+  ]);
+
+  const subscriptionPlans = plansRaw.map((p) => ({ id: p.id, name: p.name }));
 
   const rows = raw.map((r) => ({
     ...r,
@@ -60,7 +66,7 @@ export default async function AdminStudentsPage({ searchParams }: PageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <StudentForm mode="create" />
+          <StudentForm mode="create" subscriptionPlans={subscriptionPlans} />
         </CardContent>
       </Card>
 
