@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import prisma from "@/infrastructure/db/prisma";
 import { getActiveSubscriptionsByFixedPlan } from "@/features/subscriptions/data";
+import { formatEgp } from "@/lib/format-egp";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -23,12 +24,6 @@ const ratingAr: Record<string, string> = {
   GOOD: "جيد",
   WEAK: "ضعيف",
 };
-
-function formatMoney(amount: Prisma.Decimal | null | undefined): string {
-  const n = Number((amount ?? new Prisma.Decimal(0)).toString());
-  if (!Number.isFinite(n)) return "0";
-  return new Intl.NumberFormat("ar", { numberingSystem: "latn", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
-}
 
 async function memorizationSessionsLast30Days(): Promise<number> {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -131,7 +126,7 @@ export default async function AdminReportsPage() {
           ملخص 30 يومًا
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <StatTile label="إيرادات (30 يومًا)" value={formatMoney(revenue30._sum.amount)} hint={payLabel} hintInline />
+          <StatTile label="إيرادات (30 يومًا)" value={formatEgp(revenue30._sum.amount)} hint={payLabel} hintInline />
           <StatTile label="إجمالي الطلاب" value={studentTotal} />
           <StatTile label="سجلات حضور (30 يومًا)" value={attendance30} hint="عدد الصفوف" />
           <StatTile label="سجل حفظ قديم (30 يومًا)" value={memo30} tone="stone" />
@@ -144,7 +139,7 @@ export default async function AdminReportsPage() {
         <h2 id="rep-subscriptions" className="text-lg font-bold text-foreground">
           الاشتراكات النشطة حسب الباقة
         </h2>
-        <p className="text-sm font-bold text-muted">باقات شهرية ثابتة (ج.م) — عدد الطلاب الذين لديهم اشتراك نشط لكل باقة.</p>
+        <p className="text-sm font-bold text-muted">باقات شهرية ثابتة بالجنيه المصري — عدد الطلاب الذين لديهم اشتراك نشط لكل باقة.</p>
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
           <table className="w-full min-w-[360px] border-collapse text-start text-sm font-bold">
             <thead>

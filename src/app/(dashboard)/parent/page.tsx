@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
 import { loadParentDashboardRows } from "@/features/parent/parent-dashboard-data";
 import { AdminInboxSection } from "@/components/messaging/admin-inbox-section";
+import { formatEgp } from "@/lib/format-egp";
 
 const statusLabel: Record<string, string> = {
   REGULAR: "منتظم",
@@ -163,7 +164,7 @@ export default async function ParentDashboardPage() {
                           >
                             <span className="text-foreground">{inv.title}</span>
                             <span className="tabular-nums text-primary" dir="ltr">
-                              {inv.amount}
+                              {formatEgp(inv.amount)}
                             </span>
                             <Badge variant={inv.status === "OVERDUE" ? "warning" : "outline"}>{invStatus[inv.status] ?? inv.status}</Badge>
                             {inv.dueDate ? (

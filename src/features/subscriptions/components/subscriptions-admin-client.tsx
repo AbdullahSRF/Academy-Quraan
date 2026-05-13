@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { nativeSelectClassName } from "@/lib/native-form-classes";
 import { assignStudentSubscriptionFormAction, updateStudentSubscriptionStatusFormAction } from "@/features/subscriptions/actions";
 import type { StudentSubscriptionClient, SubscriptionPlanClient } from "@/features/subscriptions/serialize-for-client";
+import { formatEgp } from "@/lib/format-egp";
 
 const statusAr: Record<string, string> = {
   ACTIVE: "نشط",
@@ -30,7 +31,7 @@ function Submit({ label }: { label: string }) {
 }
 
 function planOptionLabel(p: SubscriptionPlanClient): string {
-  return `${p.name} — ${p.priceMonthly} ج.م شهريًا`;
+  return `${p.name} — ${formatEgp(p.priceMonthly, { monthly: true })}`;
 }
 
 export function SubscriptionsAdminClient({
@@ -56,7 +57,7 @@ export function SubscriptionsAdminClient({
           الباقات المعتمدة
         </h2>
         <p className="text-sm font-bold text-muted">
-          أربع باقات ثابتة بالنظام (ج.م) — مرتبة: 8 حصص، ثم 12، ثم 16، ثم 24. لا يوجد إنشاء أو تعديل باقات من هذه الصفحة.
+          أربع باقات ثابتة بالنظام بالجنيه المصري — مرتبة: 8 حصص، ثم 12، ثم 16، ثم 24. لا يوجد إنشاء أو تعديل باقات من هذه الصفحة.
         </p>
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
           <table className="w-full min-w-[520px] border-collapse text-start text-sm font-bold">
@@ -81,7 +82,7 @@ export function SubscriptionsAdminClient({
                     <td className="px-4 py-3 text-foreground">{p.name}</td>
                     <td className="px-4 py-3 tabular-nums text-muted">{p.sessionsPerMonth ?? "—"}</td>
                     <td className="px-4 py-3 tabular-nums text-muted" dir="ltr">
-                      {p.priceMonthly} ج.م
+                      {formatEgp(p.priceMonthly)}
                     </td>
                     <td className="px-4 py-3 tabular-nums text-muted">{p._count.subscriptions}</td>
                   </tr>
@@ -183,7 +184,7 @@ export function SubscriptionsAdminClient({
                         <span className="block text-xs font-bold">الحصص الشهرية: {s.plan.sessionsPerMonth}</span>
                       ) : null}
                       <span className="block text-xs font-bold" dir="ltr">
-                        {s.plan.priceMonthly} ج.م شهريًا
+                        {formatEgp(s.plan.priceMonthly, { monthly: true })}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">{statusAr[s.status] ?? s.status}</td>

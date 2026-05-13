@@ -15,6 +15,7 @@ import {
   parseAdminCalendarView,
 } from "@/features/dashboard/admin-dashboard-data";
 import { AdminCalendarNav } from "@/features/dashboard/admin-calendar-nav";
+import { formatEgp } from "@/lib/format-egp";
 
 const ratingAr: Record<string, string> = {
   EXCELLENT: "ممتاز",
@@ -22,16 +23,6 @@ const ratingAr: Record<string, string> = {
   GOOD: "جيد",
   WEAK: "ضعيف",
 };
-
-function formatRevenue30d(amount: { toString(): string }): string {
-  const n = Number(amount.toString());
-  if (!Number.isFinite(n)) return "0";
-  return new Intl.NumberFormat("ar", {
-    numberingSystem: "latn",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(n);
-}
 
 function paymentsCountLabel(count: number): string {
   if (count === 0) return "لا دفعات";
@@ -87,7 +78,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
           <StatTile label="فواتير مفتوحة" value={stats.invoicesOpen} tone="amber" hint="صادرة أو متأخرة" />
           <StatTile
             label="إيرادات (30 يومًا)"
-            value={formatRevenue30d(dash.revenue30d)}
+            value={formatEgp(dash.revenue30d)}
             hint={paymentsCountLabel(dash.paymentsCount30d)}
             hintInline
           />
@@ -189,7 +180,7 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
                     <p className="text-xs font-bold text-muted">{inv.title}</p>
                   </div>
                   <Badge variant="warning" dir="ltr">
-                    {inv.amount.toString()}
+                    {formatEgp(inv.amount)}
                   </Badge>
                 </div>
               ))

@@ -10,6 +10,7 @@ import { countSessionsByUtcMonth, loadStudentMemorizationDashboard } from "@/fea
 import { getParentIdForUser } from "@/features/parent/data";
 import { getParentChildFinanceAttendance } from "@/features/parent/parent-dashboard-data";
 import prisma from "@/infrastructure/db/prisma";
+import { formatEgp } from "@/lib/format-egp";
 
 const invStatus: Record<string, string> = {
   DRAFT: "مسودة",
@@ -127,7 +128,7 @@ export default async function ParentChildMemorizationPage({ params }: PageProps)
       <Card>
         <CardHeader>
           <CardTitle>الفواتير والمدفوعات</CardTitle>
-          <CardDescription>آخر فواتير الطالب — إجمالي ما دُفع على هذه العيّنة: {paidOnInvoices.toFixed(2)}</CardDescription>
+          <CardDescription>آخر فواتير الطالب — إجمالي ما دُفع على هذه العيّنة: {formatEgp(paidOnInvoices)}</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto p-0 sm:p-6">
           {invs.length === 0 ? (
@@ -147,7 +148,7 @@ export default async function ParentChildMemorizationPage({ params }: PageProps)
                   <tr key={inv.id} className="border-b border-border odd:bg-muted-bg/25">
                     <td className="px-4 py-3 text-foreground">{inv.title}</td>
                     <td className="px-4 py-3 tabular-nums" dir="ltr">
-                      {inv.amount.toString()}
+                      {formatEgp(inv.amount)}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={inv.status === "OVERDUE" ? "warning" : "secondary"}>{invStatus[inv.status] ?? inv.status}</Badge>

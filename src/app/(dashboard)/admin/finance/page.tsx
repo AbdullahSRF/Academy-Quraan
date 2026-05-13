@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { listRecentInvoices, listStudentsForFinance } from "@/features/finance/data";
 import { getFinanceDashboardData } from "@/features/finance/finance-dashboard-data";
 import { InvoiceForm } from "@/features/finance/components/invoice-form";
-import { Prisma } from "@prisma/client";
+import { formatEgp } from "@/lib/format-egp";
 
 const invStatus: Record<string, string> = {
   DRAFT: "مسودة",
@@ -23,12 +23,6 @@ const paySessionAr: Record<string, string> = {
   PAID: "مدفوع",
   WAIVED: "معفى",
 };
-
-function formatMoney(d: Prisma.Decimal): string {
-  const n = Number(d.toString());
-  if (!Number.isFinite(n)) return "0";
-  return new Intl.NumberFormat("ar", { numberingSystem: "latn", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
-}
 
 function paymentsCountLabel(count: number): string {
   if (count === 0) return "لا دفعات";
@@ -71,11 +65,11 @@ export default async function AdminFinancePage() {
           مؤشرات مالية
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <StatTile label="إيرادات (30 يومًا)" value={formatMoney(fin.revenue30d)} hint={paymentsCountLabel(fin.paymentsCount30d)} hintInline />
-          <StatTile label="إيرادات (365 يومًا)" value={formatMoney(fin.revenue365d)} hint={paymentsCountLabel(fin.paymentsCount365d)} hintInline />
+          <StatTile label="إيرادات (30 يومًا)" value={formatEgp(fin.revenue30d)} hint={paymentsCountLabel(fin.paymentsCount30d)} hintInline />
+          <StatTile label="إيرادات (365 يومًا)" value={formatEgp(fin.revenue365d)} hint={paymentsCountLabel(fin.paymentsCount365d)} hintInline />
           <StatTile label="حصص مناطق مكتملة (30 يومًا)" value={fin.sessionsCompleted30d} hint="MemorizationSession" hintInline />
           <StatTile label="حصص — دفع معلّق" value={fin.pendingMemoPayments120d} tone="amber" hint="120 يومًا" hintInline />
-          <StatTile label="فواتير مفتوحة (مبلغ)" value={formatMoney(fin.openInvoicesAmount)} hint={`${fin.openInvoicesCount} فاتورة`} hintInline />
+          <StatTile label="فواتير مفتوحة (مبلغ)" value={formatEgp(fin.openInvoicesAmount)} hint={`${fin.openInvoicesCount} فاتورة`} hintInline />
           <StatTile label="عيّنة — متأخرة / صادرة" value={`${overdue} / ${issued}`} hint="من آخر 80 فاتورة" />
         </div>
       </section>
@@ -86,7 +80,7 @@ export default async function AdminFinancePage() {
             <div>
               <CardTitle>الاشتراكات (قاعدة البيانات)</CardTitle>
               <CardDescription>
-                أربع باقات ثابتة (ج.م) — MRR تقريبي من مجموع أسعار الباقات للاشتراكات النشطة المرتبطة بهذه الباقات فقط.
+                أربع باقات ثابتة بالجنيه المصري — MRR تقريبي من مجموع أسعار الباقات للاشتراكات النشطة المرتبطة بهذه الباقات فقط.
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -108,9 +102,9 @@ export default async function AdminFinancePage() {
                 <span className="text-2xl tabular-nums text-amber-600 dark:text-amber-400">{fin.subscriptionsPaused}</span>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted-bg/40 px-4 py-3">
-                <span className="text-muted">MRR تقريبي (ج.م)</span>
+                <span className="text-muted">MRR تقريبي شهريًا</span>
                 <span className="text-xl tabular-nums text-primary" dir="ltr">
-                  {formatMoney(new Prisma.Decimal(fin.subscriptionsMrrApprox))}
+                  {formatEgp(fin.subscriptionsMrrApprox)}
                 </span>
               </div>
             </div>
@@ -186,7 +180,7 @@ export default async function AdminFinancePage() {
                     </p>
                   </div>
                   <span className="tabular-nums text-primary" dir="ltr">
-                    {formatMoney(p.amount)}
+                    {formatEgp(p.amount)}
                   </span>
                 </div>
               ))
@@ -235,7 +229,7 @@ export default async function AdminFinancePage() {
                     </td>
                     <td className="px-4 py-3 text-foreground">{inv.title}</td>
                     <td className="px-4 py-3 text-foreground" dir="ltr">
-                      {inv.amount.toString()}
+                      {formatEgp(inv.amount)}
                     </td>
                     <td className="px-4 py-3 text-muted">{invStatus[inv.status] ?? inv.status}</td>
                     <td className="px-4 py-3 text-muted" dir="ltr">
