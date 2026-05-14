@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { upsertAdminUserFromEnv } from "../src/lib/auth/upsert-admin-from-env";
 import { globalAyahIndex } from "../src/lib/quran/verse-counts";
+import { importQuranLibraryToDb } from "../src/lib/quran/import-quran-to-db";
 import { syncFixedSubscriptionPlans } from "../src/features/subscriptions/data";
 
 const prisma = new PrismaClient();
@@ -78,6 +79,8 @@ async function main() {
 
   await bootstrapMemorizationZonesForAllStudents();
   await seedSubscriptionDefaults();
+
+  await importQuranLibraryToDb(prisma);
 }
 
 main()

@@ -440,3 +440,32 @@ model AcademySettings {
   timezone             String     @default("Asia/Riyadh")
   updatedAt            DateTime   @updatedAt
 }
+
+/**
+ * مكتبة القرآن كاملة في قاعدة البيانات (114 سورة، 6236 آية حسب العدّ المعتمد في التطبيق).
+ * النص العربي يُستورد من حزمة `quran-json` (ترخيص CC-BY-4.0 — راجع مستودع الحزمة).
+ * أرقام الصفحة والجزء والحزب تُملأ من `verse-meta.generated` (مصحف مدني api.quran.com).
+ */
+model QuranSurah {
+  number       Int    @id
+  nameAr       String
+  verseCount   Int
+  revelation   String?
+
+  ayahs QuranAyah[]
+}
+
+model QuranAyah {
+  globalIndex Int    @id
+  surahNumber Int
+  ayahNumber  Int
+  text        String @db.Text
+  page        Int
+  juz         Int
+  hizb        Int
+
+  surah QuranSurah @relation(fields: [surahNumber], references: [number], onDelete: Cascade)
+
+  @@unique([surahNumber, ayahNumber])
+  @@index([surahNumber])
+}

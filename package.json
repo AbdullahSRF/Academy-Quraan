@@ -55,7 +55,8 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.6.0",
     "zod": "^3.24.2",
-    "zustand": "^5.0.5"
+    "zustand": "^5.0.5",
+    "quran-json": "^3.1.2"
   },
   "devDependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
