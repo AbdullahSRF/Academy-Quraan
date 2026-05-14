@@ -2,7 +2,7 @@
 
 import type { AttendanceStatus, SessionPaymentStatus, SessionRating } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import prisma from "@/infrastructure/db/prisma";
 import { runCompleteMemorizationSession } from "./application/complete-session";
 import { recomputeStudentMemorizationStats } from "./data/student-dashboard";

@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  /** bcryptjs يعتمد على `crypto` في Node — يُحمَّل من `node_modules` في مسارات الخادم فقط. */
+  serverExternalPackages: ["bcryptjs"],
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },

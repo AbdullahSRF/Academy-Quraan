@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import { redirect } from "next/navigation";
 import { BookOpenCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";

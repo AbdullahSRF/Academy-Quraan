@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import type { AppRole } from "@/auth.config";

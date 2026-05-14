@@ -1,7 +1,8 @@
+import "server-only";
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import type { User } from "@prisma/client";
 import { CredentialsSignin } from "next-auth";
@@ -37,7 +38,7 @@ function parseRemember(raw: unknown): boolean {
   return true;
 }
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -86,6 +87,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const pwd = parsed.data.password;
           const variants = Array.from(new Set([pwd, pwd.trim()].filter((p) => p.length > 0)));
+          const bcrypt = (await import("bcryptjs")).default;
           let valid = false;
           for (const candidate of variants) {
             if (await bcrypt.compare(candidate, user.passwordHash)) {

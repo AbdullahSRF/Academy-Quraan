@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import type { AppRole } from "@/auth.config";
 import type { Session } from "next-auth";
 

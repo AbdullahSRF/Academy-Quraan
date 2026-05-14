@@ -1,5 +1,6 @@
+import "server-only";
+
 import { Role, type PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 export function adminEmailFromEnv(): string {
   const raw = process.env.ADMIN_EMAIL ?? "admin@academy.local";
@@ -8,6 +9,7 @@ export function adminEmailFromEnv(): string {
 
 /** إنشاء أو تحديث حساب المشرف من ADMIN_EMAIL و ADMIN_PASSWORD (نفس منطق الـ seed). */
 export async function upsertAdminUserFromEnv(db: PrismaClient): Promise<void> {
+  const bcrypt = (await import("bcryptjs")).default;
   const email = adminEmailFromEnv();
   const password = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
   const passwordHash = await bcrypt.hash(password, 12);

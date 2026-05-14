@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import { redirect } from "next/navigation";
 
 export default async function AdminSegmentLayout({ children }: { children: React.ReactNode }) {

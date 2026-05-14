@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import { buildAdminSummaryForExport, summaryToCsvRows } from "@/features/reports/admin-summary-export";
 import { logger } from "@/lib/logger";
 import { rateLimitHit } from "@/lib/rate-limit";

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import prisma from "@/infrastructure/db/prisma";
 import {
   assignSubscriptionSchema,

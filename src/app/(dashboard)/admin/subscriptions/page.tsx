@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { listFixedSubscriptionPlansWithCounts, listStudentSubscriptions } from "@/features/subscriptions/data";

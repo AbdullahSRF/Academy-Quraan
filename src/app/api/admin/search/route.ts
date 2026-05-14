@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import prisma from "@/infrastructure/db/prisma";
 import { logger } from "@/lib/logger";
 import { rateLimitHit } from "@/lib/rate-limit";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Session } from "next-auth";
 import { BookOpen, CheckCircle2, LineChart, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { auth } from "@/auth";
+import { auth } from "@/auth-session";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
